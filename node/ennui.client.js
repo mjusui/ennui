@@ -1,1 +1,1 @@
-browser/client/ennui.js
+../browser/client/ennui.js
