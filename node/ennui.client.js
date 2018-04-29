@@ -1,1 +1,1 @@
-/home/mjusui/git/ennui/browser/client/ennui.js
+browser/client/ennui.js
