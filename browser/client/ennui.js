@@ -1,12 +1,12 @@
-/*
-  ennui.js is designed for: 
-    unique modeling,
-    exhaustive iteration,
-    linear DOM decoration,
-    stateful event handling,
-    poetic abbr of pure javascript,
+/***
+  ennui.js is designed by mjusi, featured by: 
+    * humor predefined data model
+    * gradual levels of iteration
+    * fluent DOM decoration
+    * stateful event handling
+    * poetic abbr of pure javascript
   to hack your javascript more emotional !
-*/
+***/
 
 enn={};
 
@@ -14,6 +14,9 @@ ennui:{
 
 enn.obj=JSON.parse;
 enn.str=JSON.stringify;
+enn.num=(tgt)=>{
+  return tgt*1;
+};
 enn.cnct=(one,...oth)=>{
   return {
     sep:(sep=' ')=>{
@@ -65,7 +68,17 @@ enn.whic=(w=true,a=null,b=null)=>{
   }
   return b;
 };
-enn.loop=(len,hndl,remap=false)=>{
+enn.loop=(len,hndl,remap=false,fill=null)=>{
+  if(fill){
+    const res=[];
+    enn.loop(len,(cnt,end)=>{
+      const r=hndl(cnt,end);
+      if(v){
+        res.push(r);
+      }
+    });
+    return res;
+  }
   if(remap){
     const res=[];
     enn.loop(len,(cnt,end)=>{
@@ -74,58 +87,151 @@ enn.loop=(len,hndl,remap=false)=>{
     return res;
   }
   let cnt=0;
-  const end=()=>{
+  let res=undefined;
+  const end=(r)=>{
     cnt=len;
+    res=r;
+    return r;
   };
   while(cnt < len){
     hndl(cnt++,end);
   }
+  return res;
 };
-enn.scan=(ary,hndl,remap=false)=>{
-  if(remap){
+enn.scan=(ary,hndl,remap=false,fill=false)=>{
+  /*if(remap){
     const res=[];
     enn.scan(ary,(idx,val,end)=>{
       res[idx]=hndl(idx,val,end);
     });
     return res;
+  }*/
+  return enn.loop(ary.length,(cnt,end)=>{
+    return hndl(cnt,ary[cnt],end);
+  },remap,fill);
+};
+enn.nmbr=(len)=>{
+  return enn.loop(len,(cnt)=>{
+    return cnt;
+  },true);
+};
+enn.itrt=(obj,hndl,remap=false,fill=false)=>{
+  if(fill){
+    res={};
+    enn.itrt(obj,(name,val,end)=>{
+      const r=hndl(name,val,end);
+      if(r){
+        res[name]=r;
+      }
+    });
+    return res;
   }
-  enn.loop(ary.length,(cnt,end)=>{
-    hndl(cnt,ary[cnt],end);
-  });
-};
-enn.nombre=(len)=>{
-  const n=[];
-  enn.loop(len,(cnt)=>{
-    n[cnt]=cnt;
-  });
-  return n;
-};
-enn.itrt=(obj,hndl,remap=false)=>{
   if(remap){
+    res={};
+    enn.itrt(obj,(name,val,end)=>{
+      res[name]=hndl(name,val,end);
+    });
+    return res;
+  }
+  const key=enn.key(obj);
+  const len=key.length;
+  let cnt=0;
+  const res=undefined;
+  const end=(r)=>{
+    cnt=len;
+    res=r;
+    return r;
+  };
+  while(cnt < len){
+    const k=key[cnt++];
+    hndl(k,obj[k],end);
+  }
+  return res;
+  /*if(remap){
     const res={};
-    enn.itrt(obj,(name,val)=>{
-      res[name]=val;
+    enn.itrt(obj,(name,val,end)=>{
+      res[name]=hndl(name,val,end);
     });
     return res;
   }
   const key=enn.key(obj);
   let len=key.length;
   let cnt=0;
-  const end=()=>{
+  let ret=undefined;
+  const end=(r)=>{
     cnt=len;
+    ret=r;
   };
   while(cnt<len){
     const k=key[cnt++];
     hndl(k,obj[k],end)
   }
+  return ret;*/
+};
+enn.flat=(some,hndl,remap=false,fill=false)=>{
+  if(fill){
+    res=[];
+    enn.flat(some,(idx,val,end)=>{
+      const r=hndl(idx,val,end);
+      if(r){
+        res.push(r);
+      }
+    });
+    return res;
+  }
+  if(remap){
+    res=[];
+    enn.flat(some,(idx,val)=>{
+      res[idx]=hndl(idx,val,end);
+    });
+    return res;
+  }
+  let cnt=0
+  let fin=false;
+  let ret=undefined;
+  const end=(r)=>{
+    fin=true;
+    ret=r;
+  };
+  let res=undefined;
+  const nest=(some,hndl)=>{
+    enn.type(some,'a',()=>{
+      return enn.scan(some,(idx,val,end)=>{
+        if(fin){
+          end(true);
+        }
+        nest(val,hndl);
+      });
+    }) || enn.type(some,'o',()=>{
+      return enn.itrt(some,(name,val,end)=>{
+        if(fin){
+          end(true);
+        }
+        nest(val,hndl);
+      });
+    }) || hndl(cnt++,some);
+  };
+  nest(some,hndl);
+  return ret;
 };
 enn.frct=(nest,one,...some)=>{
   const f={
-    sttl:(hndl)=>{
-      if(some){
+    sttl:(hndl,remap=false)=>{
+      if(remap){
+        let cnt=0;
+        const res=[];
+        enn.frct((o)=>{
+          res[cnt++]=nest(o);
+        },one,...some)
+        .sttl((o)=>{
+          res[cnt++]=hndl(o);
+        });
+        return res;
+      }
+      if(some.length){
         nest(one);
         enn.frct(nest,...some)
-          .sttl(hndl);
+        .sttl(hndl);
         return;
       }
       hndl(one);
@@ -177,28 +283,148 @@ enn.alias=(als={})=>{
     see:(k)=>{
       return cac.get(k) || k;
     },
-    rond:(hndl)=>{enn.itrt(als,hndl);}
+    rond:(hndl,remap=false)=>{
+      return enn.itrt(als,(k,v,end)=>{
+        return hndl(k,v,end);
+      },remap,remap) || a;
+    },
   };
   return a;
 };
 enn.key=(obj)=>{
   return Object.keys(obj);
 };
+enn.regex=(txt,f='g')=>{
+  let rgx=null;
+  return {
+    tst:(tgt,hndl)=>{
+      if(hndl){
+        return enn.regex(txt,f)
+          .tst(tgt) && hndl();
+      }
+      rgx=rgx||new RegExp(txt,f);
+      return rgx.test(tgt);
+    },
+    sch:(tgt,hndl)=>{
+      if(hndl){
+        return hndl(
+          enn.regex(txt,f)
+            .sch(tgt)
+        );
+      }
+      rgx=rgx||new RegExp(txt,f);
+      return tgt.search(rgx);
+    },
+    spl:(tgt,hndl)=>{
+      if(hndl){
+        return hndl(
+          enn.regex(txt,f)
+            .spl(tgt)
+        );
+      }
+      rgx=rgx||new RegExp(txt,f);
+      return tgt.split(rgx);
+    },
+    exe:(tgt,hndl)=>{
+      if(hndl){
+        return hndl(
+          enn.regex(txt,f)
+            .exec(tgt)
+        );
+      }
+      rgx=rgx||new RegExp(txt,f);
+      return rgx.exec(tgt);
+    },
+    rep:(tgt,ins,hndl)=>{
+      if(hndl){
+        return hndl(
+          enn.regex(txt,f)
+            .rep(tgt)
+        );
+      }
+      rgx=rgx||new RegExp(txt,f);
+      return tgt.replace(rgx,ins);
+    },
+    mch:(tgt,hndl)=>{
+      if(hndl){
+        return hndl(
+          enn.regex(txt,f)
+            .mch(tgt)
+        );
+      }
+      rgx=rgx||new RegExp(txt,f);
+      return tgt.match(rgx);
+    },
+  };
+};
+enn.type=(tgt,tname='obj',hndl)=>{
+  if(hndl){
+    return enn.type(
+      tgt,tname
+    ) && hndl(tgt) || true;
+  }
+  let a=false;
+  let o=false;
+  switch(tname){
+    case 'nl':tname='null';break;
+    case 'nll':tname='null';break;
+    case 'null':tname='null';break;
+    case 'udf':tname='undefined';break;
+    case 'undef':tname='undefined';break;
+    case 'undefine':tname='undefined';break;
+    case 'undefined':tname='undefined';break;
+    case 'o':tname='object';o=true;break;
+    case 'obj':tname='object';o=true;break;
+    case 'object':tname='object';o=true;break;
+    case 'b':tname='boolean';break;
+    case 'bl':tname='boolean';break;
+    case 'bool':tname='boolean';break;
+    case 'boolean':tname='boolean';break;
+    case 'a':tname='object';a=true;break;
+    case 'arr':tname='object';a=true;break;
+    case 'ary':tname='object';a=true;break;
+    case 'array':tname='object';a=true;break;
+    case 's':tname='string';break;
+    case 'str':tname='string';break;
+    case 'string':tname='string';break;
+    case 'n':tname='number';break;
+    case 'num':tname='number';break;
+    case 'number':tname='number';break;
+    case 'f':tname='function';break;
+    case 'fnc':tname='function';break;
+    case 'func':tname='function';break;
+    case 'function':tname='function';break;
+    default:tname='object';o=true;break;
+  }
+  if(a){
+    return Array.isArray(tgt);
+  }
+  if(o){
+    return typeof tgt===tname &&
+      !Array.isArray(tgt);
+  }
+  return typeof tgt===tname;
+};
 enn.vlid=(hndl)=>{
   const ary=[];
   const v={
+    typ:(tname)=>{
+      ary.push((tgt)=>{
+        return enn.type(tgt,tname);
+      });
+      return v;
+    },
     add:(hndl)=>{
       ary.push(hndl);
       return v;
     },
     end:()=>{
       return (tgt)=>{
-        let vld=true;
+        let t=true;
         enn.scan(ary,(idx,hndl,end)=>{
-          vld=hndl(tgt);
-          vld || end();
+          t=hndl(tgt) || end(false);
         });
-        return vld;
+        return t;
       };
     },
   };
@@ -220,51 +446,71 @@ enn.flag=(flg={})=>{
     },
     up:(name,...arg)=>{
       flg[name]=true;
-      if(hup[name])enn.scan(
-        hup[name],(idx,hndl)=>{
+      enn.scan(
+        hup[name]||[],
+        (idx,hndl)=>{
           hndl(...arg);
-      });
+        }
+      );
       return f;
     },
     dw:(name,...arg)=>{
       flg[name]=false;
-      if(hdw[name])enn.scan(
-        hdw[name],(idx,hndl)=>{
+      enn.scan(
+        hdw[name]||[],
+        (idx,hndl)=>{
           hndl(...arg);
-      });
+        }
+      );
       return f;
     },
-    pls:(name,...arg)=>{return f.up(name,...arg).dw(name,...arg);},
+    pls:(name,...arg)=>{
+      return f.up(
+        name,...arg
+      ).dw(
+        name,...arg
+      );
+    },
     at:(name)=>{return flg[name];},
     on:(name,hndl)=>{
-      if(!hup[name])hup[name]=[];
+      flg[name]=flg[name]||false;
+      hup[name]=hup[name]||[];
       hup[name].push(hndl);
       return f;
     },
     off:(name,hndl)=>{
-      if(!hdw[name])hdw[name]=[];
+      flg[name]=flg[name]||false;
+      hdw[name]=hdw[name]||[];
       hdw[name].push(hndl);
       return f;
     },
-    and:(ary=enn.key(flg),hndl)=>{
+    and:(hndl,...f)=>{
       let t=true;
-      enn.scan(ary,(idx,fname,end)=>{
-        t=f.at(fname);
-        t || end();
+      enn.scan(f,(idx,fname,end)=>{
+        t=f.at(fname) || end(false);
       });
-      if(t&&hndl)hndl();
+      if(t){
+        hndl();
+      }
       return t;
     },
     or:(ary=enn.key(flg),hndl)=>{
       let t=false;
       enn.scan(ary,(idx,fname,end)=>{
-        t=f.at(fname);
-        t && end()
+        t=f.at(fname) && end(true);
       });
-      if(t&&hndl)hndl();
+      if(t){
+        hndl();
+      }
       return t;
     },
-    rond:(hndl)=>{enn.itrt(flg,hndl);}
+    rond:(hndl,remap=false)=>{
+      return enn.itrt(flg,(name,val,end)=>{
+        return enn.type(val,'b',(val)=>{
+          return hndl(name,val,end);
+        });
+      },remap) || a;
+    },
   };
   return f;
 };
@@ -315,7 +561,12 @@ enn.liar=(yes=true)=>{
   return l;
 };
 enn.csr=(len=0)=>{
-  const c=(cnt)=>{while(cnt<0)cnt+=len;return cnt%len;};
+  const c=(cnt)=>{
+    while(cnt<0){
+      cnt+=len;
+    }
+    return cnt%len;
+  };
   return c;
 };
 enn.ring=(ary)=>{
@@ -327,21 +578,36 @@ enn.ring=(ary)=>{
     return i;
   };
   //let len=ary.length;
-  const rin={nxt:()=>{return ary[idx(++cnt)];},
-    bak:()=>{return ary[idx(--cnt)];},
-    pos:(x=1)=>{return ary[idx(cnt+x,false)];},
-    cur:()=>{return ary[idx()];},
-    /*pus:(o)=>{return ary.push(o);},
-    pop:()=>{return ary.pop();},
-    sft:()=>{return ary.shift();},
-    usf:(o)=>{return ary.unshift(o);},
-    del:(i)=>{if(i)cnt=i;ary.splice(idx(),1);return ary[idx()];},
-    add:(o,i)=>{if(i)cnt=i;ary.splice(idx(),0,o);return ary[idx()];},*/
-    hed:()=>{return ary[idx(0)];},
-    tal:()=>{return ary[idx(-1)];},
-    len:()=>{return ary.length;},
-    idx:()=>{return idx();},
-    rond:(hndl)=>{enn.scan(ary,hndl);}
+  const rin={
+    nxt:()=>{
+      return ary[idx(++cnt)];
+    },
+    bak:()=>{
+      return ary[idx(--cnt)];
+    },
+    pos:(x=1)=>{
+      return ary[idx(cnt+x,false)];
+    },
+    cur:()=>{
+      return ary[idx()];
+    },
+    hed:()=>{
+      return ary[idx(0)];
+    },
+    tal:()=>{
+      return ary[idx(-1)];
+    },
+    len:()=>{
+      return ary.length;
+    },
+    idx:()=>{
+      return idx();
+    },
+    rond:(hndl,remap=false,fill=false)=>{
+      return enn.scan(
+        ary,hndl,remap,fill
+      );
+    }
   };
   return rin;
 };
@@ -350,11 +616,19 @@ enn.pendulum=(ary)=>{
   let idx=0;
   let cnt=0;
   const turn=ary.length-1;
-  return {swing:()=>{
-    idx+=vec[Math.floor(cnt++/turn%2)];
-    return ary[idx];},
-    cur:()=>{return ary[idx];},
-    rond:(hndl)=>{enn.scan(ary,hndl);}
+  return {
+    swing:()=>{
+      idx+=vec[Math.floor(cnt++/turn%2)];
+      return ary[idx];
+    },
+    cur:()=>{
+      return ary[idx];
+    },
+    rond:(hndl,remap=false,fill=false)=>{
+      return enn.scan(
+        ary,hndl,remap,fill
+      );
+    },
   };
 };
 enn.grop=(def=[])=>{
@@ -383,29 +657,30 @@ enn.grop=(def=[])=>{
     },
     del:(name,val)=>{
       if(val){
-        const nary=[];
-        enn.scan(g.see(name),(idx,aval)=>{
-          if(aval===val)return;
-          nary.push(val);
-        });
-        gro[name]=nary; 
+        gro[name]=enn.scan(
+          g.see(name),(idx,aval)=>{
+            if(aval===val){
+              return null;
+            }
+            return aval;
+          },
+        true,true);
         return g;
       }
       gro[name]=[];
       return g;
     },
-    rond:(name,hndl)=>{
-      enn.scan(g.see(name),(idx,val)=>{
-        hndl(val);
-      });
+    rond:(name,hndl,remap=false,fill=false)=>{
+      return enn.scan(
+        g.see(name),hndl,remap,fill
+      );
     }
   };
   return g;
 };
 enn.clon=(obj={},literal=false)=>{
-  const cln={};
-  enn.itrt(obj,(name,val)=>{
-    cln[name]=val;
+  const cln=enn.itrt(obj,(name,val)=>{
+    return val;
     if(literal){
       /*
         'true' -> true
@@ -414,7 +689,7 @@ enn.clon=(obj={},literal=false)=>{
         '{a:b,c:d}' -> {a:b,c:d}
       */
     }
-  });
+  },true);
   const c={
     mod:(name,val)=>{
       cln[name]=val;
@@ -463,9 +738,11 @@ enn.cach=(cac={})=>{
       return cac[k]||def.ini(k);
     },
     del:(k)=>{cac[k]=null;return c;},
-    rond:(hndl)=>{enn.itrt(cac,(k,v)=>{
-      if(v)hndl(k,v);
-    });},
+    rond:(hndl,remap=false)=>{
+      return enn.itrt(
+        cac,hndl,remap,remap
+      ) || c;
+    },
   };
   return c;
 };
@@ -559,13 +836,12 @@ enn.chan=(v=null)=>{
     len:()=>{
       return len;
     },
-    rond:(hndl)=>{
+    rond:(hndl,remap=false,fill=false)=>{
       let l=hed;
-      enn.loop(len,(cnt)=>{
-        hndl(l.val);
+      return enn.loop(len,(cnt,end)=>{
         l=l.nxt;
-      });
-      return c;
+        return hndl(l.bak.val,end);
+      },remap,fill) || c;
     }
   };
   c.add(v);
@@ -615,7 +891,11 @@ enn.map=(len=0)=>{
     len:(l)=>{if(l)len=l;return len;},
     ext:(x)=>{len=len+x;return len;},
     shk:(x)=>{len=len-x;if(len<0)len=0;return len;},
-    rond:(hndl)=>{enn.loop(len,(cnt)=>{hndl(s(cnt),t(cnt))});},
+    rond:(hndl,remap=false,fill=false)=>{
+      return enn.loop(len,(cnt,end)=>{
+        return hndl(s(cnt),t(cnt),end);
+      },remap,fill) || m;
+    },
   };
   return m;
 };
@@ -776,12 +1056,14 @@ enn.glcr=(siz=17)=>{
   g.pull=g.thaw;
  return g;
 };
-enn.watr=(flg)=>{
-  let f={};
+enn.watr=(flg=[])=>{
+  const f={};
   let flen=flg.length;
   let m=null;
   let h=()=>{};
-  enn.scan(flg,(idx,fname)=>{f[fname]=false;});
+  enn.scan(flg,(idx,fname)=>{
+    f[fname]=false;
+  });
   const w={
     up:(fname,model)=>{
       if(f[fname])return w;
@@ -809,18 +1091,18 @@ enn.watr=(flg)=>{
 };
 enn.fire=()=>{
   const coal={};
-  let m=null;
+  let a=null;
   let up=false;
   const f={
-    pls:(model)=>{
-      return f.up(model).dw();
+    pls:(...arg)=>{
+      return f.up(...arg).dw();
     },
-    up:(model)=>{
-      m=model;
+    up:(...arg)=>{
+      a=arg;
       up=true;
       enn.itrt(coal,(name,ary)=>{
-        if(ary)enn.scan(ary,(idx,hndl)=>{
-          hndl(model);
+        enn.scan(ary||[],(idx,hndl)=>{
+          hndl(...a);
         });
       });
       return f;
@@ -832,7 +1114,7 @@ enn.fire=()=>{
     fuel:(name,hndl)=>{
       coal[name]=coal[name]||[];
       coal[name].push(hndl);
-      if(up)hndl(m);
+      if(up)hndl(...a);
       return f;
     },
     chil:(name)=>{coal[name]=null;return f;},
@@ -871,12 +1153,15 @@ enn.mode=(ary)=>{
     return mname;
   };
   const m={
-    rond:(hndl)=>{
-      enn.loop(mod.len(),(cnt)=>{
-        hndl(mod.cur());
+    rond:(hndl,remap=false,fill=false)=>{
+      return mod.rond(
+        hndl,remap,fill
+      ) || m;
+      /*enn.loop(mod.len(),(cnt,end)=>{
+        hndl(mod.cur(),end);
         mod.nxt();
       });
-      return m;
+      return m;*/
     },
     val:(name,ptrn)=>{
       if(ptrn){
@@ -896,8 +1181,7 @@ enn.mode=(ary)=>{
     }*/
   };
   enn.itrt(mod,(name,func)=>{
-    if(m[name])return;
-    m[name]=func;
+    m[name]=m[name]||func;
   });
   m.nxt=()=>{return chng(mod.nxt());};
   m.bak=()=>{return chng(mod.bak());};
@@ -936,9 +1220,10 @@ enn.sock=(opt)=>{
         console.log(e);
         const opt=enn.obj(e.data);
         enn.scan(
-        h[opt.name]||[],(idx,hndl)=>{
-          hndl(opt);          
-        });
+          h[opt.name]||[],(idx,hndl)=>{
+            hndl(opt);          
+          }
+        );
       }).on('error',(e)=>{
         console.log(e);
       }).on('close',(e)=>{
@@ -948,59 +1233,6 @@ enn.sock=(opt)=>{
   };
   return s;
 };
-/*const soc=enn.cach()
-  .def(null);
-const sochndl=enn.cach()
-  .def();
-enn.sock={
-  send:(opt)=>{
-    soc.cur().real.send(
-      enn.str(opt)
-    );
-    return enn.sock;
-  },
-  cur:(name)=>{
-    soc.cur(name);
-    return enn.sock;
-  },
-  del:(name)=>{
-    soc.get(
-      name
-    ).real.close();
-    return enn.sock;
-  },
-  add:(name,opt)=>{
-    const s=soc.get(name)||soc.set(
-      name,
-      enn.hndl(new WebSocket(
-        opt.url,
-        opt.prot
-      )).on('open',(e)=>{
-        console.log(e);
-      }).on('message',(e)=>{
-        console.log(e);
-        console.log(e.data);
-        const opt=enn.obj(e.data);
-        enn.itrt(
-        sochndl[opt.name],(idx,hndl)=>{
-          hndl(opt);          
-        });
-      }).on('error',(e)=>{
-        console.log(e);
-      }).on('close',(e)=>{
-        console.log(e);
-        soc.del(name);
-      })
-    ).get(name);
-    soc.cur(name);
-    return enn.sock;
-  },
-  on:(name,hndl)=>{
-    const ary=sochndl[name]||[];
-    ary.push(hndl);
-    return enn.sock;
-  },
-};*/
 enn.hndl=(tgt)=>{
   const h={
     real:tgt,
@@ -1203,19 +1435,24 @@ enn.clock=(job,intv=1000)=>{
 };*/
 enn.http={
   req:(method,opt,dry)=>{
+    let url=opt.url;
     if(opt.path)
-      opt.url=opt.url+opt.path;
-    if(opt.para)enn.itrt(opt.para,(k,v)=>{
-      opt.url=`${opt.url}${k}=${v}&`
-    });
-    opt.url=opt.url.replace(/&$/,'');
+      url=url+opt.path;
 
-    if(dry)return opt.url;
+    let and=''
+    enn.itrt(opt.para||{},(k,v)=>{
+      url=`${url}${and}${k}=${v}`
+      and='&';
+    });
+
+    if(dry){
+      return url;
+    }
 
     const req=new XMLHttpRequest();
-    req.open(method,opt.url);
+    req.open(method,url);
 
-    if(opt.header)enn.itrt(opt.header,(k,v)=>{
+    enn.itrt(opt.header||{},(k,v)=>{
       req.setRequestHeader(k,v);
     });
 
