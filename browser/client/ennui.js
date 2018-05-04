@@ -1,4 +1,5 @@
 /***
+test
   ennui.js is designed by mjusi, featured by: 
     * humor predefined data model
     * gradual levels of iteration
@@ -31,7 +32,7 @@ enn.cnct=(one,...oth)=>{
 enn.print=(one,...oth)=>{
   console.log(enn.cnct(
     one,...oth
-  ));
+  ).sep());
 };
 enn.bench=(hndl,...arg)=>{
   const t=new Date().getTime();
