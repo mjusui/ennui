@@ -1,1 +1,0 @@
-../browser/client/ennui.js
