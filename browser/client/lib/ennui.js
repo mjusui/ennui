@@ -18,16 +18,26 @@ enn.str=JSON.stringify;
 enn.num=(tgt)=>{
   return tgt*1;
 };
-enn.cnct=(one,...oth)=>{
+enn.cnct=(one,...some)=>{
   return {
-    sep:(sep=' ')=>{
+    sep:(sep=' ',trim=true)=>{
       let s=one;
-      enn.scan(oth,(idx,val)=>{
+      enn.scan(some,(idx,val)=>{
+        if(!val && trim){
+          return;
+        }
         s+=`${sep}${val}`;
       });
       return s;
     },
   }; 
+};
+enn.splt=(str,sep=' ',trim=true)=>{
+  return enn.scan(str.split(
+    sep
+  ),(idx,sbst)=>{
+    return sbst;
+  },true,trim);
 };
 enn.print=(one,...oth)=>{
   console.log(enn.cnct(
@@ -69,12 +79,12 @@ enn.whic=(w=true,a=null,b=null)=>{
   }
   return b;
 };
-enn.loop=(len,hndl,remap=false,fill=null)=>{
-  if(fill){
+enn.loop=(len,hndl,remap=false,trim=null)=>{
+  if(trim){
     const res=[];
     enn.loop(len,(cnt,end)=>{
       const r=hndl(cnt,end);
-      if(v){
+      if(r){
         res.push(r);
       }
     });
@@ -99,7 +109,7 @@ enn.loop=(len,hndl,remap=false,fill=null)=>{
   }
   return res;
 };
-enn.scan=(ary,hndl,remap=false,fill=false)=>{
+enn.scan=(ary,hndl,remap=false,trim=false)=>{
   /*if(remap){
     const res=[];
     enn.scan(ary,(idx,val,end)=>{
@@ -109,15 +119,15 @@ enn.scan=(ary,hndl,remap=false,fill=false)=>{
   }*/
   return enn.loop(ary.length,(cnt,end)=>{
     return hndl(cnt,ary[cnt],end);
-  },remap,fill);
+  },remap,trim);
 };
 enn.nmbr=(len)=>{
   return enn.loop(len,(cnt)=>{
     return cnt;
   },true);
 };
-enn.itrt=(obj,hndl,remap=false,fill=false)=>{
-  if(fill){
+enn.itrt=(obj,hndl,remap=false,trim=false)=>{
+  if(trim){
     res={};
     enn.itrt(obj,(name,val,end)=>{
       const r=hndl(name,val,end);
@@ -169,8 +179,8 @@ enn.itrt=(obj,hndl,remap=false,fill=false)=>{
   }
   return ret;*/
 };
-enn.flat=(some,hndl,remap=false,fill=false)=>{
-  if(fill){
+enn.flat=(some,hndl,remap=false,trim=false)=>{
+  if(trim){
     res=[];
     enn.flat(some,(idx,val,end)=>{
       const r=hndl(idx,val,end);
@@ -217,12 +227,29 @@ enn.flat=(some,hndl,remap=false,fill=false)=>{
 };
 enn.frct=(nest,one,...some)=>{
   const f={
-    sttl:(hndl,remap=false)=>{
+    sttl:(hndl,remap=false,trim=false)=>{
+      if(trim){
+        let cnt=0;
+        const res=[];
+        enn.frct((o,end)=>{
+          const n=nest(o,end);
+          if(n){
+            res[cnt++]=n;
+          }
+        },one,...some)
+        .sttl((o)=>{
+          const n=hndl(o);
+          if(n){
+            res[cnt++]=n;
+          }
+        });
+        return res;
+      }
       if(remap){
         let cnt=0;
         const res=[];
-        enn.frct((o)=>{
-          res[cnt++]=nest(o);
+        enn.frct((o,end)=>{
+          res[cnt++]=nest(o,end);
         },one,...some)
         .sttl((o)=>{
           res[cnt++]=hndl(o);
@@ -230,7 +257,17 @@ enn.frct=(nest,one,...some)=>{
         return res;
       }
       if(some.length){
-        nest(one);
+        let fin=false;
+        let ret=undefined;
+        const end=(val)=>{
+          fin=true;
+          ret=val;
+          return val;
+        };
+        nest(one,end);
+        if(fin){
+          return ret;
+        }
         enn.frct(nest,...some)
         .sttl(hndl);
         return;
@@ -604,9 +641,9 @@ enn.ring=(ary)=>{
     idx:()=>{
       return idx();
     },
-    rond:(hndl,remap=false,fill=false)=>{
+    rond:(hndl,remap=false,trim=false)=>{
       return enn.scan(
-        ary,hndl,remap,fill
+        ary,hndl,remap,trim
       );
     }
   };
@@ -625,9 +662,9 @@ enn.pendulum=(ary)=>{
     cur:()=>{
       return ary[idx];
     },
-    rond:(hndl,remap=false,fill=false)=>{
+    rond:(hndl,remap=false,trim=false)=>{
       return enn.scan(
-        ary,hndl,remap,fill
+        ary,hndl,remap,trim
       );
     },
   };
@@ -671,9 +708,9 @@ enn.grop=(def=[])=>{
       gro[name]=[];
       return g;
     },
-    rond:(name,hndl,remap=false,fill=false)=>{
+    rond:(name,hndl,remap=false,trim=false)=>{
       return enn.scan(
-        g.see(name),hndl,remap,fill
+        g.see(name),hndl,remap,trim
       );
     }
   };
@@ -837,12 +874,12 @@ enn.chan=(v=null)=>{
     len:()=>{
       return len;
     },
-    rond:(hndl,remap=false,fill=false)=>{
+    rond:(hndl,remap=false,trim=false)=>{
       let l=hed;
       return enn.loop(len,(cnt,end)=>{
         l=l.nxt;
         return hndl(l.bak.val,end);
-      },remap,fill) || c;
+      },remap,trim) || c;
     }
   };
   c.add(v);
@@ -883,6 +920,65 @@ enn.crwn=(opt={})=>{
   };
   return c;
 };
+enn.tree=(overwrite=false)=>{
+  const root=enn.cach()
+    .def(null);
+  const b={
+    branch:null,
+    sprout:(name,leaf)=>{
+    },
+  };
+  const branch=(bran=root)=>{
+    
+    return b;
+  };
+  const t={
+    ow:(ow=null)=>{
+      overwrite=enn.type(ow,'b',(ow)=>{
+        return ow;
+      }) || (overwrite==false);
+      return t;
+    },
+    nod:(val,one,...some)=>{
+      let bran=root;
+      let sprout=(name,leaf)=>{
+        return bran.get(name)||bran.set(
+          name,
+          leaf||enn.cach()
+            .def(null)
+        ).get(name);
+      };
+      if(overwrite){
+        sprout=(name,leaf)=>{
+          return bran.set(
+            name,
+            leaf||enn.cach()
+              .def(null)
+          ).get(name);
+        };
+      }
+      enn.frct((one)=>{
+        bran=sprout(one);
+      },one,...some).sttl((one)=>{
+        bran=sprout(one,val);
+      });
+      return bran;
+    },
+    set:(val,one,...some)=>{
+      t.node(val,one,...some);
+      return t;
+    },
+    get:(...some)=>{
+      let bran=root;
+      enn.scan(some,(idx,name,end)=>{
+        bran=bran.get(name)||end(null);
+      });
+      return bran;
+    },
+  };
+  return t;
+};
+/*
 enn.map=(len=0)=>{
   let s=()=>{return 'src';};
   let t=()=>{return 'tgt';};
@@ -900,6 +996,7 @@ enn.map=(len=0)=>{
   };
   return m;
 };
+*/
 const pal={
   nil:{r:0,g:0,b:0,a:0}
 };
@@ -1154,9 +1251,9 @@ enn.mode=(ary)=>{
     return mname;
   };
   const m={
-    rond:(hndl,remap=false,fill=false)=>{
+    rond:(hndl,remap=false,trim=false)=>{
       return mod.rond(
-        hndl,remap,fill
+        hndl,remap,trim
       ) || m;
       /*enn.loop(mod.len(),(cnt,end)=>{
         hndl(mod.cur(),end);
