@@ -128,7 +128,7 @@ enn.nmbr=(len)=>{
 };
 enn.itrt=(obj,hndl,remap=false,trim=false)=>{
   if(trim){
-    res={};
+    const res={};
     enn.itrt(obj,(name,val,end)=>{
       const r=hndl(name,val,end);
       if(r){
@@ -138,7 +138,7 @@ enn.itrt=(obj,hndl,remap=false,trim=false)=>{
     return res;
   }
   if(remap){
-    res={};
+    const res={};
     enn.itrt(obj,(name,val,end)=>{
       res[name]=hndl(name,val,end);
     });
@@ -771,7 +771,31 @@ enn.cach=(cac={})=>{
       def.ini=hndl;
       return c;
     },
-    set:(k,v)=>{cac[k]=v;return c;},
+    nest:(name)=>{
+      return c.get(name)||c.set(
+        name,
+        enn.cach()
+          .def(null)
+      ).get(name);
+    },
+    eval:(name,hndl, ...arg)=>{
+      return c.get(name)||c.bet(
+        name,hndl,...arg
+      ).get(name);
+    },
+    val:(name,val)=>{
+      return c.get(name)||c.set(
+        name,val
+      ).get(name);
+    },
+    bet:(k,h,...a)=>{
+      cac[k]=h(...a);
+      return c;
+    },
+    set:(k,v)=>{
+      cac[k]=v;
+      return c;
+    },
     get:(k)=>{
       return cac[k]||def.ini(k);
     },
@@ -920,52 +944,36 @@ enn.crwn=(opt={})=>{
   };
   return c;
 };
-enn.tree=(overwrite=false)=>{
+enn.tree=()=>{
   const root=enn.cach()
     .def(null);
-  const b={
-    branch:null,
-    sprout:(name,leaf)=>{
-    },
-  };
-  const branch=(bran=root)=>{
-    
-    return b;
-  };
   const t={
-    ow:(ow=null)=>{
-      overwrite=enn.type(ow,'b',(ow)=>{
-        return ow;
-      }) || (overwrite==false);
+    eval:(name,hndl,one,two,...some)=>{
+      let bran=root;
+      if(one){
+        bran=bran.nest(one);
+      }
+      if(two){
+        bran=bran.nest(two);
+      }
+      if(some.length){
+        enn.scan(some,(idx,n)=>{
+          bran=bran.nest(n);
+        });
+      }
+      return bran.eval(name,hndl);
+    },
+    val:(name,val,...some)=>{
+      return t.eval(name,()=>{
+        return val;
+      },...some);
+    },
+    bet:(name,hndl,...some)=>{
+      t.eval(name,hndl,...some);
       return t;
     },
-    nod:(val,one,...some)=>{
-      let bran=root;
-      let sprout=(name,leaf)=>{
-        return bran.get(name)||bran.set(
-          name,
-          leaf||enn.cach()
-            .def(null)
-        ).get(name);
-      };
-      if(overwrite){
-        sprout=(name,leaf)=>{
-          return bran.set(
-            name,
-            leaf||enn.cach()
-              .def(null)
-          ).get(name);
-        };
-      }
-      enn.frct((one)=>{
-        bran=sprout(one);
-      },one,...some).sttl((one)=>{
-        bran=sprout(one,val);
-      });
-      return bran;
-    },
-    set:(val,one,...some)=>{
-      t.node(val,one,...some);
+    set:(name,val,...some)=>{
+      t.val(name,val,...some);
       return t;
     },
     get:(...some)=>{
@@ -1419,27 +1427,59 @@ enn.deco=(elm)=>{
       real(prnt).appendChild(elm);
       return dec;
     },
-    stl:(name,val)=>{
+    stl:(name,val='')=>{
       elm.style[name]=val;
      return dec;
     },
-    prp:(pname,val)=>{
+    prp:(pname,val='')=>{
       elm[pname]=val;
       return dec;
     },
-    atr:(aname,val)=>{
+    atr:(aname,val='')=>{
       elm.setAttribute(aname,val);
       return dec;
     },
     on:(ename,hndl,cap=false)=>{
-      elm.addEventListener(ename,(e)=>{
-        hndl(e);
-      },cap);
+      elm.addEventListener(
+        ename,
+        hndl,
+        cap
+      );
       return dec;
     },
   };
   return dec;
 };
+/*enn.vogue=()=>{
+  const tr=enn.tree(true);
+  const hn=enn.cach()
+    .def(null);
+  const id=enn.cach()
+    .def(null);
+  const v={
+    tmpl:(name,hndl,...idname)=>{
+      hn.set(name,hndl);
+      id.set(name,idname);
+      return v;
+    },
+    cast:(name,opt={})=>{
+      return tr.eval(()=>{
+          return hn.get(
+            name
+          )(name,opt),
+        },
+        name,
+        ...enn.scan(id.get(name),(idx,idname)=>{
+          return opt[idname];
+        });
+      );
+    },
+  };
+  enn.itrt(tr,(name,hndl)=>{
+    v[name]=v[name]||hndl;
+  });
+  return v;
+}*/
 enn.rand=(mult=17)=>{
   return Math.floor(
     Math.random() * 10**mult
