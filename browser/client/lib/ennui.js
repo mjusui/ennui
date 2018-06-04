@@ -33,11 +33,11 @@ enn.cnct=(one,...some)=>{
   }; 
 };
 enn.splt=(str,sep=' ',trim=true)=>{
-  return enn.scan(str.split(
+  return enn.rmap.scan(str.split(
     sep
   ),(idx,sbst)=>{
     return sbst;
-  },true,trim);
+  },trim);
 };
 enn.print=(one,...oth)=>{
   console.log(enn.cnct(
@@ -79,8 +79,8 @@ enn.whic=(w=true,a=null,b=null)=>{
   }
   return b;
 };
-enn.loop=(len,hndl,remap=false,trim=null)=>{
-  if(trim){
+enn.loop=(len,hndl/*,remap=false,trim=false*/)=>{
+  /*if(trim){
     const res=[];
     enn.loop(len,(cnt,end)=>{
       const r=hndl(cnt,end);
@@ -96,7 +96,7 @@ enn.loop=(len,hndl,remap=false,trim=null)=>{
       res[cnt]=hndl(cnt,end);
     });
     return res;
-  }
+  }*/
   let cnt=0;
   let res=undefined;
   const end=(r)=>{
@@ -109,7 +109,7 @@ enn.loop=(len,hndl,remap=false,trim=null)=>{
   }
   return res;
 };
-enn.scan=(ary,hndl,remap=false,trim=false)=>{
+enn.scan=(ary,hndl/*,remap=false,trim=false*/)=>{
   /*if(remap){
     const res=[];
     enn.scan(ary,(idx,val,end)=>{
@@ -119,15 +119,15 @@ enn.scan=(ary,hndl,remap=false,trim=false)=>{
   }*/
   return enn.loop(ary.length,(cnt,end)=>{
     return hndl(cnt,ary[cnt],end);
-  },remap,trim);
+  }/*,remap,trim*/);
 };
 enn.nmbr=(len)=>{
-  return enn.loop(len,(cnt)=>{
+  return enn.rmap.loop(len,(cnt)=>{
     return cnt;
-  },true);
+  });
 };
-enn.itrt=(obj,hndl,remap=false,trim=false)=>{
-  if(trim){
+enn.itrt=(obj,hndl/*,remap=false,trim=false*/)=>{
+  /*if(trim){
     const res={};
     enn.itrt(obj,(name,val,end)=>{
       const r=hndl(name,val,end);
@@ -143,7 +143,7 @@ enn.itrt=(obj,hndl,remap=false,trim=false)=>{
       res[name]=hndl(name,val,end);
     });
     return res;
-  }
+  }*/
   const key=enn.key(obj);
   const len=key.length;
   let cnt=0;
@@ -158,29 +158,9 @@ enn.itrt=(obj,hndl,remap=false,trim=false)=>{
     hndl(k,obj[k],end);
   }
   return res;
-  /*if(remap){
-    const res={};
-    enn.itrt(obj,(name,val,end)=>{
-      res[name]=hndl(name,val,end);
-    });
-    return res;
-  }
-  const key=enn.key(obj);
-  let len=key.length;
-  let cnt=0;
-  let ret=undefined;
-  const end=(r)=>{
-    cnt=len;
-    ret=r;
-  };
-  while(cnt<len){
-    const k=key[cnt++];
-    hndl(k,obj[k],end)
-  }
-  return ret;*/
 };
-enn.flat=(some,hndl,remap=false,trim=false)=>{
-  if(trim){
+enn.flat=(some,hndl/*,remap=false,trim=false*/)=>{
+  /*if(trim){
     res=[];
     enn.flat(some,(idx,val,end)=>{
       const r=hndl(idx,val,end);
@@ -196,7 +176,7 @@ enn.flat=(some,hndl,remap=false,trim=false)=>{
       res[idx]=hndl(idx,val,end);
     });
     return res;
-  }
+  }*/
   let cnt=0
   let fin=false;
   let ret=undefined;
@@ -227,8 +207,8 @@ enn.flat=(some,hndl,remap=false,trim=false)=>{
 };
 enn.frct=(nest,one,...some)=>{
   const f={
-    sttl:(hndl,remap=false,trim=false)=>{
-      if(trim){
+    sttl:(hndl/*,remap=false,trim=false*/)=>{
+      /*if(trim){
         let cnt=0;
         const res=[];
         enn.frct((o,end)=>{
@@ -255,7 +235,7 @@ enn.frct=(nest,one,...some)=>{
           res[cnt++]=hndl(o);
         });
         return res;
-      }
+      }*/
       if(some.length){
         let fin=false;
         let ret=undefined;
@@ -277,6 +257,85 @@ enn.frct=(nest,one,...some)=>{
   };
   return f;
 };
+const rmap={};
+enn.scan([
+  'loop','scan','flat'
+],(idx,hname)=>{
+  rmap[hname]=(tgt,hndl,trim=false)=>{
+    const res=[];
+    let eval=(val)=>{
+      res.push(val);
+    };
+    if(trim){
+      eval=(val)=>{
+        if(val){
+          res.push(val);
+        }
+      };
+    }
+    enn[hname](tgt,(...arg)=>{
+      eval(
+        hndl(...arg)
+      );
+    });
+    return res;
+  };
+});
+enn.scan([
+  'itrt'
+],(idx,hname)=>{
+  rmap[hname]=(obj,hndl,trim=false)=>{
+    const res={};
+    let eval=(name,val)=>{
+      res[name]=val;
+    };
+    if(trim){
+      eval=(name,val)=>{
+        if(val){
+          res[name]=val;
+        }
+      };
+    }
+    enn[hname](obj,(name,...arg)=>{
+      eval(
+        name,hndl(name,...arg)
+      );
+    });
+    return res;
+  };
+});
+enn.scan([
+  'frct'
+],(idx,hname)=>{
+  rmap[hname]=(nest,one,...some)=>{
+    const f={};
+    f.sttl=(hndl,trim=false)=>{
+      const res=[];
+      let eval=(val)=>{
+        res.push(val);
+      };
+      if(trim){
+        eval=(val)=>{
+          if(val){
+            res.push(val);
+          }
+        };
+      }
+      enn[hname]((o,end)=>{
+        eval(
+          nest(o,end)
+        );
+      },one,...some).sttl((o)=>{
+        eval(
+          hndl(o)
+        );
+      });
+      return res;
+    };
+    return f;
+  };
+});
+enn.rmap=rmap;
 enn.land=(name,rsrc)=>{
   const lnd={};
   const l={
@@ -321,10 +380,11 @@ enn.alias=(als={})=>{
     see:(k)=>{
       return cac.get(k) || k;
     },
-    rond:(hndl,remap=false)=>{
-      return enn.itrt(als,(k,v,end)=>{
-        return hndl(k,v,end);
-      },remap,remap) || a;
+    rmap:(hndl,trim=false)=>{
+      return enn.rmap.itrt(als,hndl,trim);
+    },
+    rond:(hndl)=>{
+      return enn.itrt(als,hndl) || a;
     },
   };
   return a;
@@ -542,12 +602,33 @@ enn.flag=(flg={})=>{
       }
       return t;
     },
+    rmap:(hndl,trim=false)=>{
+      const res={};
+      let eval=(name,val)=>{
+        res[name]=val;
+      };
+      if(trim){
+        eval=(name,val)=>{
+          if(val){
+            res[name]=val;
+          }
+        };
+      }
+      enn.itrt(flg,(name,val,end)=>{
+        enn.type(val,'b',(val)=>{
+          eval(
+            name,hndl(name,val,end)
+          );
+        });
+      });
+      return res;
+    },
     rond:(hndl,remap=false)=>{
       return enn.itrt(flg,(name,val,end)=>{
-        return enn.type(val,'b',(val)=>{
-          return hndl(name,val,end);
+        enn.type(val,'b',(val)=>{
+          hndl(name,val,end);
         });
-      },remap) || a;
+      }) || a;
     },
   };
   return f;
@@ -641,11 +722,13 @@ enn.ring=(ary)=>{
     idx:()=>{
       return idx();
     },
-    rond:(hndl,remap=false,trim=false)=>{
-      return enn.scan(
-        ary,hndl,remap,trim
-      );
-    }
+    rmap:(hndl,trim=false)=>{
+      return enn.rmap
+        .scan(ary,hndl,trim);
+    },
+    rond:(hndl)=>{
+      return enn.scan(ary,hndl);
+    },
   };
   return rin;
 };
@@ -662,10 +745,12 @@ enn.pendulum=(ary)=>{
     cur:()=>{
       return ary[idx];
     },
-    rond:(hndl,remap=false,trim=false)=>{
-      return enn.scan(
-        ary,hndl,remap,trim
-      );
+    rmap:(hndl,trim=false)=>{
+      return enn.rmap
+        .scan(ary,hndl,trim);
+    },
+    rond:(hndl)=>{
+      return enn.scan(ary,hndl);
     },
   };
 };
@@ -708,16 +793,22 @@ enn.grop=(def=[])=>{
       gro[name]=[];
       return g;
     },
-    rond:(name,hndl,remap=false,trim=false)=>{
+    rmap:(name,hndl,trim=false)=>{
+      return enn.rmap
+        .scan(
+          g.see(name),hndl,trim
+        );
+    },
+    rond:(name,hndl)=>{
       return enn.scan(
-        g.see(name),hndl,remap,trim
+        g.see(name),hndl
       );
-    }
+    },
   };
   return g;
 };
 enn.clon=(obj={},literal=false)=>{
-  const cln=enn.itrt(obj,(name,val)=>{
+  const cln=enn.rmap.itrt(obj,(name,val)=>{
     return val;
     if(literal){
       /*
@@ -727,7 +818,7 @@ enn.clon=(obj={},literal=false)=>{
         '{a:b,c:d}' -> {a:b,c:d}
       */
     }
-  },true);
+  });
   const c={
     mod:(name,val)=>{
       cln[name]=val;
@@ -898,12 +989,20 @@ enn.chan=(v=null)=>{
     len:()=>{
       return len;
     },
-    rond:(hndl,remap=false,trim=false)=>{
+    rmap:(hndl,trim=false)=>{
+      let l=hed;
+      return enn.rmap
+        .loop(len,(cnt,end)=>{
+          l=l.nxt;
+          return hndl(l.bak.val,end);
+        },trim);
+    },
+    rond:(hndl)=>{
       let l=hed;
       return enn.loop(len,(cnt,end)=>{
         l=l.nxt;
-        return hndl(l.bak.val,end);
-      },remap,trim) || c;
+        hndl(l.bak.val,end);
+      }) || c;
     }
   };
   c.add(v);
@@ -948,19 +1047,22 @@ enn.tree=()=>{
   const root=enn.cach()
     .def(null);
   const t={
-    eval:(name,hndl,one,two,...some)=>{
+    eval:(name,hndl,one,two,thr,...some)=>{
       let bran=root;
       if(one){
         bran=bran.nest(one);
-      }
-      if(two){
-        bran=bran.nest(two);
-      }
-      if(some.length){
-        enn.scan(some,(idx,n)=>{
-          bran=bran.nest(n);
-        });
-      }
+        if(two){
+          bran=bran.nest(two);
+          if(thr){
+            bran=bran.nest(thr);
+            if(some.length){
+              enn.scan(some,(idx,n)=>{
+                bran=bran.nest(n);
+              });
+            }/*some*/
+          }/*thr*/
+        }/*two*/
+      }/*one*/
       return bran.eval(name,hndl);
     },
     val:(name,val,...some)=>{
@@ -986,25 +1088,6 @@ enn.tree=()=>{
   };
   return t;
 };
-/*
-enn.map=(len=0)=>{
-  let s=()=>{return 'src';};
-  let t=()=>{return 'tgt';};
-  const m={
-    src:(hndl)=>{s=hndl;return m;},
-    tgt:(hndl)=>{t=hndl;return m;},
-    len:(l)=>{if(l)len=l;return len;},
-    ext:(x)=>{len=len+x;return len;},
-    shk:(x)=>{len=len-x;if(len<0)len=0;return len;},
-    rond:(hndl,remap=false,fill=false)=>{
-      return enn.loop(len,(cnt,end)=>{
-        return hndl(s(cnt),t(cnt),end);
-      },remap,fill) || m;
-    },
-  };
-  return m;
-};
-*/
 const pal={
   nil:{r:0,g:0,b:0,a:0}
 };
@@ -1259,15 +1342,12 @@ enn.mode=(ary)=>{
     return mname;
   };
   const m={
-    rond:(hndl,remap=false,trim=false)=>{
-      return mod.rond(
-        hndl,remap,trim
-      ) || m;
-      /*enn.loop(mod.len(),(cnt,end)=>{
-        hndl(mod.cur(),end);
-        mod.nxt();
-      });
-      return m;*/
+    rmap:(hndl,trim=false)=>{
+      return mod.rmap
+        .rond(hndl,trim);
+    },
+    rond:(hndl)=>{
+      return mod.rond(hndl) || m;
     },
     val:(name,ptrn)=>{
       if(ptrn){
@@ -1449,6 +1529,45 @@ enn.deco=(elm)=>{
     },
   };
   return dec;
+};
+enn.tmpl=(name='make',...arg)=>{
+  const t={};
+  const p=[];
+  const pttn=(name,arg)=>{
+    p.push({
+      name:name,
+      arg:arg
+    });
+    return t;
+  };
+  const b=null;
+  t.base=(name='make',...arg)=>{
+    b={
+      name:name,
+      arg:arg,
+    };
+    return t;
+  };
+  t.base(name,...arg);
+  enn.scan([
+    'clas','cname','rmvall','rmv','dprt',
+    'muslall','musl','bef','apen','fllw',
+    'blon','srt','prp','atr','on'
+  ],(idx,name)=>{
+    t[name]=(...arg)=>{
+      return pttn(name,arg);
+    };
+  });
+  t.cast=()=>{
+    const dec=enn.deco(
+      enn[b.name](...b.arg)
+    );
+    enn.scan(p,(idx,pt)=>{
+      dec[pt.name](...pt.arg);
+    });
+    return dec;
+  };
+  return v;
 };
 /*enn.vogue=()=>{
   const tr=enn.tree(true);
