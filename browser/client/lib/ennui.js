@@ -79,7 +79,7 @@ enn.whic=(w=true,a=null,b=null)=>{
   }
   return b;
 };
-enn.loop=(len,hndl/*,remap=false,trim=false*/)=>{
+enn.loop=(len,hndl,hed=0,tal=0/*,remap=false,trim=false*/)=>{
   /*if(trim){
     const res=[];
     enn.loop(len,(cnt,end)=>{
@@ -97,7 +97,8 @@ enn.loop=(len,hndl/*,remap=false,trim=false*/)=>{
     });
     return res;
   }*/
-  let cnt=0;
+  len=len-tal
+  let cnt=0+hed;
   let res=undefined;
   const end=(r)=>{
     cnt=len;
@@ -109,7 +110,7 @@ enn.loop=(len,hndl/*,remap=false,trim=false*/)=>{
   }
   return res;
 };
-enn.scan=(ary,hndl/*,remap=false,trim=false*/)=>{
+enn.scan=(ary,hndl,hed=0,tal=0/*,remap=false,trim=false*/)=>{
   /*if(remap){
     const res=[];
     enn.scan(ary,(idx,val,end)=>{
@@ -119,7 +120,7 @@ enn.scan=(ary,hndl/*,remap=false,trim=false*/)=>{
   }*/
   return enn.loop(ary.length,(cnt,end)=>{
     return hndl(cnt,ary[cnt],end);
-  }/*,remap,trim*/);
+  },hed,tal/*,remap,trim*/);
 };
 enn.nmbr=(len)=>{
   return enn.rmap.loop(len,(cnt)=>{
@@ -205,37 +206,34 @@ enn.flat=(some,hndl/*,remap=false,trim=false*/)=>{
   nest(some,hndl);
   return ret;
 };
+/*enn.frct=(nest,one,...some)=>{
+  let fin=false;
+  let ret=undefined;
+  end=(val)=>{
+    fin=true;
+    ret=val;
+    return val;
+  };
+  if(some.length){
+    nest(one,end);
+    if(fin){
+      return {
+        sttl:(hndl)=>{
+          return ret;
+        },
+      };
+    }
+    return enn.frct(nest,...some);
+  }
+  return {
+    sttl:(hndl)=>{
+      hndl(one);
+    },
+  };
+};*/
 enn.frct=(nest,one,...some)=>{
   const f={
-    sttl:(hndl/*,remap=false,trim=false*/)=>{
-      /*if(trim){
-        let cnt=0;
-        const res=[];
-        enn.frct((o,end)=>{
-          const n=nest(o,end);
-          if(n){
-            res[cnt++]=n;
-          }
-        },one,...some)
-        .sttl((o)=>{
-          const n=hndl(o);
-          if(n){
-            res[cnt++]=n;
-          }
-        });
-        return res;
-      }
-      if(remap){
-        let cnt=0;
-        const res=[];
-        enn.frct((o,end)=>{
-          res[cnt++]=nest(o,end);
-        },one,...some)
-        .sttl((o)=>{
-          res[cnt++]=hndl(o);
-        });
-        return res;
-      }*/
+    sttl:(hndl)=>{
       if(some.length){
         let fin=false;
         let ret=undefined;
@@ -463,6 +461,7 @@ enn.type=(tgt,tname='obj',hndl)=>{
   }
   let a=false;
   let o=false;
+  let c=false;
   switch(tname){
     case 'nl':tname='null';break;
     case 'nll':tname='null';break;
@@ -482,6 +481,10 @@ enn.type=(tgt,tname='obj',hndl)=>{
     case 'arr':tname='object';a=true;break;
     case 'ary':tname='object';a=true;break;
     case 'array':tname='object';a=true;break;
+    case 'c':c=true;break;
+    case 'col':c=true;break;
+    case 'collect':c=true;break;
+    case 'collection':c=true;break;
     case 's':tname='string';break;
     case 'str':tname='string';break;
     case 'string':tname='string';break;
@@ -496,6 +499,10 @@ enn.type=(tgt,tname='obj',hndl)=>{
   }
   if(a){
     return Array.isArray(tgt);
+  }
+  if(c){
+    return tgt.length
+      && enn.type(tgt.length,'n');
   }
   if(o){
     return typeof tgt===tname &&
@@ -1047,26 +1054,70 @@ enn.tree=()=>{
   const root=enn.cach()
     .def(null);
   const t={
-    eval:(name,hndl,one,two,thr,...some)=>{
-      let bran=root;
-      if(one){
-        bran=bran.nest(one);
-        if(two){
-          bran=bran.nest(two);
-          if(thr){
-            bran=bran.nest(thr);
-            if(some.length){
-              enn.scan(some,(idx,n)=>{
-                bran=bran.nest(n);
-              });
-            }/*some*/
-          }/*thr*/
-        }/*two*/
-      }/*one*/
-      return bran.eval(name,hndl);
+    eval1:(hndl,one)=>{
+      return root.eval(one,hndl);
     },
-    val:(name,val,...some)=>{
-      return t.eval(name,()=>{
+    eval2:(hndl,one,two)=>{
+      return root.nest(one)
+        .eval(two,hndl);
+    },
+    eval3:(hndl,one,two,thr)=>{
+      return root.nest(one)
+        .nest(two)
+        .eval(thr,hndl);
+    },
+    eval4:(hndl,one,two,thr,fou)=>{
+      return root.nest(one)
+        .nest(two)
+        .nest(thr)
+        .eval(fou,hndl);
+    },
+    eval:(hndl,one,two,thr,fou,...some)=>{
+      let bran=root;
+      if(some.length){
+        bran=bran.nest(one)
+          .nest(two)
+          .nest(thr)
+          .nest(fou);
+        enn.scan(some,(idx,fiv)=>{
+           bran=bran.nest(fiv);
+        },0,1);
+        bran=bran.eval(
+          some[some.length-1],hndl
+        );
+      }else if(fou){
+        bran=t.eval4(hndl,one,two,thr,fou);
+      }else if(thr){
+        bran=t.eval3(hndl,one,two,thr);
+      }else if(two){
+        bran=t.eval2(hndl,one,two);
+      }else if(one){
+        bran=t.eval1(hndl,one);
+      }
+      return bran;
+    },
+    val1:(val,one)=>{
+      return t.eval1(()=>{
+        return val;
+      },one);
+    },
+    val2:(val,one,two)=>{
+      return t.eval2(()=>{
+        return val;
+      },one,two);
+    },
+    val3:(val,one,two,thr)=>{
+      return t.eval3(()=>{
+        return val;
+      },one,two,thr);
+    },
+    val4:(val,one,two,thr,fou)=>{
+      return t.eval4(()=>{
+        return val;
+      },one,two,thr,fou);
+    },
+    val:(val,...some)=>{
+      return t.eval(()=>{
         return val;
       },...some);
     },
@@ -1530,75 +1581,85 @@ enn.deco=(elm)=>{
   };
   return dec;
 };
-enn.tmpl=(name='make',...arg)=>{
-  const t={};
-  const p=[];
-  const pttn=(name,arg)=>{
-    p.push({
-      name:name,
-      arg:arg
-    });
-    return t;
-  };
-  const b=null;
-  t.base=(name='make',...arg)=>{
-    b={
-      name:name,
-      arg:arg,
-    };
-    return t;
-  };
-  t.base(name,...arg);
-  enn.scan([
-    'clas','cname','rmvall','rmv','dprt',
-    'muslall','musl','bef','apen','fllw',
-    'blon','srt','prp','atr','on'
-  ],(idx,name)=>{
-    t[name]=(...arg)=>{
-      return pttn(name,arg);
-    };
-  });
-  t.cast=()=>{
-    const dec=enn.deco(
-      enn[b.name](...b.arg)
-    );
-    enn.scan(p,(idx,pt)=>{
-      dec[pt.name](...pt.arg);
-    });
-    return dec;
-  };
-  return v;
+const tmpl={};
+const tbase={}
+tbase.make=enn.make;
+tbase.elem=(...a)=>{
+  const elm=enn.elem(...a);
+  return enn.type(elm,'c',(elm)=>{
+console.log(elm[0]);
+    return elm[0];
+  }) || elm;
 };
-/*enn.vogue=()=>{
-  const tr=enn.tree(true);
-  const hn=enn.cach()
-    .def(null);
-  const id=enn.cach()
-    .def(null);
-  const v={
-    tmpl:(name,hndl,...idname)=>{
-      hn.set(name,hndl);
-      id.set(name,idname);
-      return v;
-    },
-    cast:(name,opt={})=>{
-      return tr.eval(()=>{
-          return hn.get(
-            name
-          )(name,opt),
+const vtr=enn.tree();
+enn.scan([
+  'make','elem'
+],(idx,bname)=>{
+  tmpl[bname]=(...arg)=>{
+    const t={};
+    const p=[];
+    const pttn=(name,arg)=>{
+      p.push({
+        name:name,
+        arg:arg
+      });
+      return t;
+    };
+    enn.scan([
+      'clas','cname','rmvall','rmv','dprt',
+      'muslall','musl','bef','apen','fllw',
+      'blon','srt','prp','atr','on'
+    ],(idx,name)=>{
+      t[name]=(...arg)=>{
+        return pttn(name,arg);
+      };
+    });
+    let once=(d,...a)=>{};
+    t.once=(hndl)=>{
+      once=hndl;
+      return t;
+    };
+    let dtil=(d,o)=>{};
+    t.dtil=(hndl)=>{
+      dtil=hndl;
+      return t;
+    };
+    const cast=()=>{
+      const dec=enn.deco(
+        tbase[bname](...arg)
+      ); 
+      enn.scan(p,(idx,pval)=>{
+        dec[pval.name](...pval.arg);
+      });
+      return dec;
+    };
+    const vogue=(...some)=>{
+      const dec=vtr.eval(
+        ()=>{
+          const d=cast();
+          once(d, ...some);
+          return d;
+        }, ...some
+      ); 
+      if(some.length < 2){
+        return dec;
+      }
+      return {
+        dtil:(...arg)=>{
+          dtil(dec,...arg);
+          return dec;
         },
-        name,
-        ...enn.scan(id.get(name),(idx,idname)=>{
-          return opt[idname];
-        });
-      );
-    },
+      };
+    };
+    t.vogue=(...tname)=>{
+      return (...some)=>{
+        return vogue(...tname,...some);
+      };
+    };
+    return t;
   };
-  enn.itrt(tr,(name,hndl)=>{
-    v[name]=v[name]||hndl;
-  });
-  return v;
-}*/
+});
+enn.tmpl=tmpl;
 enn.rand=(mult=17)=>{
   return Math.floor(
     Math.random() * 10**mult

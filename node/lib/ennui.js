@@ -186,10 +186,10 @@ enn.http.serv=(
     ht[meth.toLowerCase()]=(
       path,hndl,prnt=false
     )=>{
-      const ary=tr.val(
-        path,
+      const ary=tr.val2(
         [],
-        meth
+        meth,
+        path
       );
       ary.push((req,res,opt)=>{
         if(prnt || opt.me){
