@@ -156,7 +156,7 @@ enn.http.serv=(
       enn.scan(tr.get(
         req.method, path
       )||[], (idx,hndl,end)=>{
-        opt.inner=end;
+        opt.end=end;
         hndl(req,res,opt);
         miss=false;
       });
@@ -164,7 +164,7 @@ enn.http.serv=(
     enn.frct((one,end)=>{
       path=`${path}/${one}`;
       trig({
-        outer:end,
+        endall:end,
       });
     }, ...enn.splt(
       req.url||'/', '/'
@@ -172,7 +172,7 @@ enn.http.serv=(
       path=`${path}/${one}`;
       trig({
         me:true,
-        outer:end,
+        endall:end,
       });
     });
     if(miss){
