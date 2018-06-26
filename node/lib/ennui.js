@@ -167,7 +167,9 @@ enn.http.serv=(
         endall:end,
       });
     }, ...enn.splt(
-      req.url||'/', '/'
+      url.parse(
+        req.url
+      ).pathname||'/', '/'
     )).sttl((one)=>{
       path=`${path}/${one}`;
       trig({
@@ -176,6 +178,7 @@ enn.http.serv=(
       });
     });
     if(miss){
+console.log('miss');
       def(req,res);
     }
   };
