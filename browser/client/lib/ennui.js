@@ -79,24 +79,7 @@ enn.whic=(w=true,a=null,b=null)=>{
   }
   return b;
 };
-enn.loop=(len,hndl,hed=0,tal=0/*,remap=false,trim=false*/)=>{
-  /*if(trim){
-    const res=[];
-    enn.loop(len,(cnt,end)=>{
-      const r=hndl(cnt,end);
-      if(r){
-        res.push(r);
-      }
-    });
-    return res;
-  }
-  if(remap){
-    const res=[];
-    enn.loop(len,(cnt,end)=>{
-      res[cnt]=hndl(cnt,end);
-    });
-    return res;
-  }*/
+enn.loop=(len,hndl,hed=0,tal=0)=>{
   len=len-tal
   let cnt=0+hed;
   let res=undefined;
@@ -110,41 +93,17 @@ enn.loop=(len,hndl,hed=0,tal=0/*,remap=false,trim=false*/)=>{
   }
   return res;
 };
-enn.scan=(ary,hndl,hed=0,tal=0/*,remap=false,trim=false*/)=>{
-  /*if(remap){
-    const res=[];
-    enn.scan(ary,(idx,val,end)=>{
-      res[idx]=hndl(idx,val,end);
-    });
-    return res;
-  }*/
+enn.scan=(ary,hndl,hed=0,tal=0)=>{
   return enn.loop(ary.length,(cnt,end)=>{
     return hndl(cnt,ary[cnt],end);
-  },hed,tal/*,remap,trim*/);
+  },hed,tal);
 };
 enn.nmbr=(len)=>{
   return enn.rmap.loop(len,(cnt)=>{
     return cnt;
   });
 };
-enn.itrt=(obj,hndl/*,remap=false,trim=false*/)=>{
-  /*if(trim){
-    const res={};
-    enn.itrt(obj,(name,val,end)=>{
-      const r=hndl(name,val,end);
-      if(r){
-        res[name]=r;
-      }
-    });
-    return res;
-  }
-  if(remap){
-    const res={};
-    enn.itrt(obj,(name,val,end)=>{
-      res[name]=hndl(name,val,end);
-    });
-    return res;
-  }*/
+enn.itrt=(obj,hndl)=>{
   const key=enn.key(obj);
   const len=key.length;
   let cnt=0;
@@ -160,24 +119,7 @@ enn.itrt=(obj,hndl/*,remap=false,trim=false*/)=>{
   }
   return res;
 };
-enn.flat=(some,hndl/*,remap=false,trim=false*/)=>{
-  /*if(trim){
-    res=[];
-    enn.flat(some,(idx,val,end)=>{
-      const r=hndl(idx,val,end);
-      if(r){
-        res.push(r);
-      }
-    });
-    return res;
-  }
-  if(remap){
-    res=[];
-    enn.flat(some,(idx,val)=>{
-      res[idx]=hndl(idx,val,end);
-    });
-    return res;
-  }*/
+enn.flat=(some,hndl)=>{
   let cnt=0
   let fin=false;
   let ret=undefined;
@@ -206,10 +148,10 @@ enn.flat=(some,hndl/*,remap=false,trim=false*/)=>{
   nest(some,hndl);
   return ret;
 };
-/*enn.frct=(nest,one,...some)=>{
+/*enn.frct=(nest,...some)=>{
   let fin=false;
   let ret=undefined;
-  end=(val)=>{
+  const end=(val)=>{
     fin=true;
     ret=val;
     return val;
@@ -223,7 +165,7 @@ enn.flat=(some,hndl/*,remap=false,trim=false*/)=>{
         },
       };
     }
-    return enn.frct(nest,...some);
+    return enn.frct(nest,two,thr,fou...some);
   }
   return {
     sttl:(hndl)=>{
@@ -231,7 +173,7 @@ enn.flat=(some,hndl/*,remap=false,trim=false*/)=>{
     },
   };
 };*/
-enn.frct=(nest,one,...some)=>{
+/*enn.frct=(nest,one,...some)=>{
   const f={
     sttl:(hndl)=>{
       if(some.length){
@@ -254,7 +196,7 @@ enn.frct=(nest,one,...some)=>{
     }
   };
   return f;
-};
+};*/
 const rmap={};
 enn.scan([
   'loop','scan','flat'
@@ -302,7 +244,7 @@ enn.scan([
     return res;
   };
 });
-enn.scan([
+/*enn.scan([
   'frct'
 ],(idx,hname)=>{
   rmap[hname]=(nest,one,...some)=>{
@@ -332,7 +274,7 @@ enn.scan([
     };
     return f;
   };
-});
+});*/
 enn.rmap=rmap;
 enn.land=(name,rsrc)=>{
   const lnd={};
@@ -505,6 +447,7 @@ enn.type=(tgt,tname='obj',hndl)=>{
       && enn.type(tgt.length,'n');
   }
   if(o){
+console.log(typeof tgt);
     return typeof tgt===tname &&
       !Array.isArray(tgt);
   }
@@ -734,7 +677,7 @@ enn.ring=(ary)=>{
         .scan(ary,hndl,trim);
     },
     rond:(hndl)=>{
-      return enn.scan(ary,hndl);
+      return enn.scan(ary,hndl) || rin;
     },
   };
   return rin;
@@ -744,7 +687,7 @@ enn.pendulum=(ary)=>{
   let idx=0;
   let cnt=0;
   const turn=ary.length-1;
-  return {
+  const p={
     swing:()=>{
       idx+=vec[Math.floor(cnt++/turn%2)];
       return ary[idx];
@@ -757,9 +700,10 @@ enn.pendulum=(ary)=>{
         .scan(ary,hndl,trim);
     },
     rond:(hndl)=>{
-      return enn.scan(ary,hndl);
+      return enn.scan(ary,hndl) || p;
     },
   };
+  return p;
 };
 enn.grop=(def=[])=>{
   const gro={};
@@ -809,7 +753,7 @@ enn.grop=(def=[])=>{
     rond:(name,hndl)=>{
       return enn.scan(
         g.see(name),hndl
-      );
+      ) || g;
     },
   };
   return g;
@@ -898,9 +842,14 @@ enn.cach=(cac={})=>{
       return cac[k]||def.ini(k);
     },
     del:(k)=>{cac[k]=null;return c;},
-    rond:(hndl,remap=false)=>{
+    rmap:(hndl,trim=false)=>{
+      return enn.tmap.itrt(
+        cac,hndl,trim
+      );
+    },
+    rond:(hndl)=>{
       return enn.itrt(
-        cac,hndl,remap,remap
+        cac,hndl
       ) || c;
     },
   };
@@ -1121,10 +1070,10 @@ enn.tree=()=>{
         return val;
       },...some);
     },
-    bet:(name,hndl,...some)=>{
+    /*bet:(name,hndl,...some)=>{
       t.eval(name,hndl,...some);
       return t;
-    },
+    },*/
     set:(name,val,...some)=>{
       t.val(name,val,...some);
       return t;
@@ -1485,9 +1434,7 @@ enn.hndl=(tgt)=>{
   return h;
 };
 const real=(elm)=>{
-  let r=elm;
-  if(elm.real)r=elm.real;
-  return r;
+  return elm.real || elm;
 };
 const clas=enn.cach()
   .def(null);
@@ -1495,23 +1442,34 @@ enn.clas=clas;
 enn.deco=(elm)=>{
   const dec={
     real:elm,
-    clas:(one,...cls)=>{
+    test:(val,hndl)=>{
+      if(val){
+        hndl(dec);
+      }
+      return dec;
+    },
+    name:(name)=>{
+      return dec.atr(
+        'class',name
+      );
+    },
+    clas:(...cls)=>{
       return dec.atr(
         'class',
         enn.cnct(
-          one,...cls
+          ...cls
         ).sep()
       );
     },
-    cname:(name,one,...cls)=>{
+    cname:(name,...cls)=>{
       return dec.atr(
         'class',
-        clas.get(name)||clas.set(
+        clas.eval(
           name,
           enn.cnct(
-            one,...cls
-          ).sep()
-        ).get(name)
+            ...cls
+          ).sep
+        )
       );
     },
     rmvall:()=>{
@@ -1581,85 +1539,133 @@ enn.deco=(elm)=>{
   };
   return dec;
 };
-const tmpl={};
-const tbase={}
-tbase.make=enn.make;
-tbase.elem=(...a)=>{
-  const elm=enn.elem(...a);
-  return enn.type(elm,'c',(elm)=>{
-console.log(elm[0]);
-    return elm[0];
-  }) || elm;
-};
 const vtr=enn.tree();
-enn.scan([
-  'make','elem'
-],(idx,bname)=>{
-  tmpl[bname]=(...arg)=>{
-    const t={};
-    const p=[];
-    const pttn=(name,arg)=>{
-      p.push({
-        name:name,
-        arg:arg
-      });
-      return t;
-    };
-    enn.scan([
-      'clas','cname','rmvall','rmv','dprt',
-      'muslall','musl','bef','apen','fllw',
-      'blon','srt','prp','atr','on'
-    ],(idx,name)=>{
-      t[name]=(...arg)=>{
-        return pttn(name,arg);
-      };
+const tmpl=(hndl, ...arg)=>{
+  let pt=[];
+  const pttn=(name,arg)=>{
+    pt.push({
+      name:name,
+      arg:arg,
     });
-    let once=(d,...a)=>{};
-    t.once=(hndl)=>{
-      once=hndl;
+  };
+  const t={
+    test:(...arg)=>{
+      pttn('test',arg);
       return t;
-    };
-    let dtil=(d,o)=>{};
-    t.dtil=(hndl)=>{
-      dtil=hndl;
+    },
+    name:(...arg)=>{
+      pttn('name',arg);
       return t;
-    };
-    const cast=()=>{
-      const dec=enn.deco(
-        tbase[bname](...arg)
-      ); 
-      enn.scan(p,(idx,pval)=>{
-        dec[pval.name](...pval.arg);
-      });
-      return dec;
-    };
-    const vogue=(...some)=>{
-      const dec=vtr.eval(
-        ()=>{
-          const d=cast();
-          once(d, ...some);
-          return d;
-        }, ...some
-      ); 
-      if(some.length < 2){
-        return dec;
-      }
-      return {
-        dtil:(...arg)=>{
-          dtil(dec,...arg);
-          return dec;
-        },
-      };
-    };
-    t.vogue=(...tname)=>{
-      return (...some)=>{
-        return vogue(...tname,...some);
-      };
-    };
+    },
+    clas:(...arg)=>{
+      pttn('clas',arg);
+      return t;
+    },
+    cname:(...arg)=>{
+      pttn('cname',arg);
+      return t;
+    },
+    rmvall:(...arg)=>{
+      pttn('rmvall',arg);
+      return t;
+    },
+    rmv:(...arg)=>{
+      pttn('rmv',arg);
+      return t;
+    },
+    dprt:(...arg)=>{
+      pttn('dprt',arg);
+      return t;
+    },
+    muslall:(...arg)=>{
+      pttn('muslall',arg);
+      return t;
+    },
+    musl:(...arg)=>{
+      pttn('musl',arg);
+      return t;
+    },
+    bef:(...arg)=>{
+      pttn('bef',arg);
+      return t;
+    },
+    apen:(...arg)=>{
+      pttn('apen',arg);
+      return t;
+    },
+    fllw:(...arg)=>{
+      pttn('fllw',arg);
+      return t;
+    },
+    blon:(...arg)=>{
+      pttn('blon',arg);
+      return t;
+    },
+    stl:(...arg)=>{
+      pttn('stl',arg);
+      return t;
+    },
+    prp:(...arg)=>{
+      pttn('prp',arg);
+      return t;
+    },
+    atr:(...arg)=>{
+      pttn('atr',arg);
+      return t;
+    },
+    on:(...arg)=>{
+      pttn('on',arg);
+      return t;
+    },
+  };
+  t.clust=(hndl,...some)=>{
+    const clu=vtr.get(...some);
+    if(clu)
+      hndl(clu);
     return t;
   };
-});
-enn.tmpl=tmpl;
+  let dec=null;
+  t.rles=()=>{
+    enn.scan(pt,(idx,p)=>{
+      dec[p.name](...p.arg);
+    });
+    return dec;
+  };
+  t.cast=()=>{
+    dec=enn.deco(
+      hndl(...arg)
+    );
+    return t.rles();
+  };
+  t.vogue=(...some)=>{
+    dec=vtr.eval(
+      t.cast, ...some
+    );
+    pt=[];
+    return t;
+  };
+  return t;
+};
+enn.tmpl={};
+enn.tmpl.make=(...arg)=>{
+  return tmpl(
+    enn.make, ...arg
+    
+  );
+};
+enn.tmpl.elem=(...arg)=>{
+  return tmpl(()=>{
+    const elm=enn.elem(...arg);
+    return enn.type(elm,'c',(elm)=>{
+      return elm[0];
+    }) || elm;
+  });
+};
+enn.tmpl.text=(...arg)=>{
+  return tmpl(
+    enn.text, ...arg
+  );
+};
 enn.rand=(mult=17)=>{
   return Math.floor(
     Math.random() * 10**mult
