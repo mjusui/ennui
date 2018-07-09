@@ -1074,8 +1074,8 @@ enn.tree=()=>{
       t.eval(name,hndl,...some);
       return t;
     },*/
-    set:(name,val,...some)=>{
-      t.val(name,val,...some);
+    set:(val,...some)=>{
+      t.val(val,...some);
       return t;
     },
     get:(...some)=>{
@@ -1442,9 +1442,15 @@ enn.clas=clas;
 enn.deco=(elm)=>{
   const dec={
     real:elm,
-    test:(val,hndl)=>{
+    ref:(hndl)=>{
+      hndl(dec);
+      return dec;
+    },
+    test:(val,hndl,hndl2)=>{
       if(val){
-        hndl(dec);
+        dec.ref(hndl);
+      }else if(hndl2){
+        dec.ref(hndl2);
       }
       return dec;
     },
@@ -1549,10 +1555,6 @@ const tmpl=(hndl, ...arg)=>{
     });
   };
   const t={
-    test:(...arg)=>{
-      pttn('test',arg);
-      return t;
-    },
     name:(...arg)=>{
       pttn('name',arg);
       return t;
@@ -1618,27 +1620,42 @@ const tmpl=(hndl, ...arg)=>{
       return t;
     },
   };
+  const deco=(dec)=>{
+    t.deco=dec;
+    return dec;
+  };
+  t.ref=(hndl)=>{
+    hndl(t);
+    return t;
+  };
+  t.test=(val,hndl,hndl2)=>{
+    if(val){
+      t.ref(hndl);
+    }else if(hndl2){
+      t.ref(hndl2);
+    }
+    return t;
+  };
   t.clust=(hndl,...some)=>{
     const clu=vtr.get(...some);
     if(clu)
       hndl(clu);
     return t;
   };
-  let dec=null;
   t.rles=()=>{
     enn.scan(pt,(idx,p)=>{
-      dec[p.name](...p.arg);
+      t.deco[p.name](...p.arg);
     });
-    return dec;
+    return t.deco;
   };
   t.cast=()=>{
-    dec=enn.deco(
+    t.deco=enn.deco(
       hndl(...arg)
     );
     return t.rles();
   };
   t.vogue=(...some)=>{
-    dec=vtr.eval(
+    t.deco=vtr.eval(
       t.cast, ...some
     );
     pt=[];
