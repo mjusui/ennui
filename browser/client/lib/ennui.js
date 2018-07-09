@@ -148,31 +148,16 @@ enn.flat=(some,hndl)=>{
   nest(some,hndl);
   return ret;
 };
-/*enn.frct=(nest,...some)=>{
-  let fin=false;
-  let ret=undefined;
-  const end=(val)=>{
-    fin=true;
-    ret=val;
-    return val;
-  };
-  if(some.length){
-    nest(one,end);
-    if(fin){
-      return {
-        sttl:(hndl)=>{
-          return ret;
-        },
-      };
-    }
-    return enn.frct(nest,two,thr,fou...some);
-  }
-  return {
-    sttl:(hndl)=>{
-      hndl(one);
-    },
-  };
-};*/
+enn.frct=(nest,...some)=>{
+  enn.scan(some,(idx,val)=>{
+    nest(val);
+  },0,1);
+  return { sttl:(hndl)=>{
+    hndl(
+      some[some.length-1]
+    );
+  }};
+};
 /*enn.frct=(nest,one,...some)=>{
   const f={
     sttl:(hndl)=>{
