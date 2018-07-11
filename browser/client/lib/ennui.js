@@ -148,7 +148,7 @@ enn.flat=(some,hndl)=>{
   nest(some,hndl);
   return ret;
 };
-enn.frct=(nest,...some)=>{
+enn.rcrs=(nest,...some)=>{
   enn.scan(some,(idx,val)=>{
     nest(val);
   },0,1);
