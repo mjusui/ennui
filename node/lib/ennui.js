@@ -161,7 +161,7 @@ enn.http.serv=(
         miss=false;
       });
     };
-    enn.frct((one,end)=>{
+    enn.rcrs((one,end)=>{
       path=`${path}/${one}`;
       trig({
         endall:end,
