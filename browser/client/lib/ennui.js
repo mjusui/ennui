@@ -273,7 +273,7 @@ enn.land=(name,rsrc)=>{
       return w;
     },
     del:(name)=>{
-      lnd[name]=null;
+      lnd[name]=undefined;
       return w;
     },
     opn:(name,hndl)=>{
@@ -716,14 +716,14 @@ enn.grop=(def=[])=>{
     },
     del:(name,val)=>{
       if(val){
-        gro[name]=enn.scan(
+        gro[name]=enn.rmap.scan(
           g.see(name),(idx,aval)=>{
             if(aval===val){
-              return null;
+              return undefined;
             }
             return aval;
           },
-        true,true);
+        true);
         return g;
       }
       gro[name]=[];
@@ -826,7 +826,10 @@ enn.cach=(cac={})=>{
     get:(k)=>{
       return cac[k]||def.ini(k);
     },
-    del:(k)=>{cac[k]=null;return c;},
+    del:(k)=>{
+      cac[k]=undefined;
+      return c;
+    },
     rmap:(hndl,trim=false)=>{
       return enn.tmap.itrt(
         cac,hndl,trim
@@ -1166,7 +1169,7 @@ enn.berg=(siz=1)=>{
           const vname=queu.deq();
           if(vname===name){
             sqez(vname);
-            return
+            return;
           }
           queu.enq(vname);
         });
