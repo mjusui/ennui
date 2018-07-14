@@ -149,8 +149,8 @@ enn.flat=(some,hndl)=>{
   return ret;
 };
 enn.rcrs=(nest,...some)=>{
-  enn.scan(some,(idx,val)=>{
-    nest(val);
+  enn.scan(some,(idx,val,end)=>{
+    nest(val,end);
   },0,1);
   return { sttl:(hndl)=>{
     hndl(
