@@ -133,20 +133,119 @@ enn.http.post=(opt,dry)=>{
 enn.http.delete=(opt,dry)=>{
   return enn.http.req('delete',opt,dry);
 };
+enn.http.resp=(cmmn=(res)=>{})=>{
+  const sc=enn.cach()
+    .def(undefined);
+  const resp=(res)=>{
+    const r={};
+    let close=false;
+    r.test=(val,hndl,hndl2)=>{
+      if(close){
+        return r;
+      }
+      if(val){
+        hndl(r);
+      }else if(hndl){
+        hndl2(r);
+      }return r;
+    };
+    r.eval=(hndl,hndl2,hndl3)=>{
+      if(hndl()){
+        hndl2(r);
+      }else if(hndl3){
+        hndl3(r);
+      }
+      return r;
+    };
+    r.cast=(name,hndl)=>{
+      if(close){
+        return r;
+      }
+      cmmn(res);
+      enn.scan(sc.get(name),(idx,hndl)=>{
+        hndl(res);
+      });
+      hndl(res);
+      res.end();
+      close=true;
+      return r;
+    };
+    return r;
+  };
+  const r={
+    def:(hndl)=>{
+      sc.def(hndl);
+      return r;
+    },
+    tmpl:(name,hndl)=>{
+      sc.val(
+        name,[]
+      ).push(hndl);
+      return r;
+    },
+    fix:()=>{
+      return resp;
+    },
+  };
+  enn.scan([
+    100,101,102,103,
+    200,201,202,203,204,205,206,207,208,226,
+    300,301,302,303,304,305,306,307,308,
+    400,401,402,403,404,405,406,407,408,409,410,
+    411,412,413,414,415,416,417,418,421,422,423,424,426,
+    451,
+    500,501,502,503,504,505,506,507,508,509,510
+  ],(idx,code)=>{
+    r.tmpl(code,(res)=>{
+      res.statusCode=code;
+    });
+  });
+  return r;
+};
 enn.http.serv=(
-  cmmn=(req,res)=>{},opt={}
+  cmmn=(req,res,end)=>{},opt={}
 )=>{
   const o=enn.http.pars(opt);
   const tr=enn.tree();
   const ev={};
   let def=(req,res,opt)=>{};
-  const rt=(req,res)=>{
+  const rt=(req,res,body='')=>{
+/*
+req={
+  headers:{
+    'user-agent': '',
+    host: '',
+    accept:'',
+  },
+  httpVersion:'1.1',
+  method:'POST;,
+  rawHeaders:['user-agent','',host,'',accept,''],
+  rawTrailers:[].
+  statusCode:'404',
+  statusMessage:'NG',
+  trailers:[],
+  url:'/xxx/yy?a=b&c=d',
+};
+*/
+    
+    const purl=url.parse(
+      req.url,true
+    );
+    const para=enn.rmap.itrt(purl.query,(name,val)=>{
+      return val;
+    });
     let fin=false;
     const end=(val)=>{
       fin=true;
       return val;
     };
-    cmmn(req,res,end);
+    cmmn(req,res,{
+      end:end,
+      endall:end,
+      path:purl.pathname,
+      para:para,
+      body:body,
+    });
     if(fin){
       return;
     }
@@ -157,6 +256,10 @@ enn.http.serv=(
         req.method, path
       )||[], (idx,hndl,end)=>{
         opt.end=end;
+        opt.path=purl.pathname;
+        opt.para=para;
+        opt.body=body;
+
         hndl(req,res,opt);
         miss=false;
       });
@@ -174,13 +277,26 @@ enn.http.serv=(
       path=`${path}/${one}`;
       trig({
         me:true,
-        endall:end,
+        //endall:end,
       });
     });
     if(miss){
-console.log('miss');
       def(req,res);
     }
+  };
+  const buf=(req,res)=>{
+    if(req.method==='PUT'||
+      req.method==='POST'){
+      let body='';
+      req.on('data',(chnk)=>{
+        body+=chnk; 
+      });
+      req.on('end',()=>{
+        rt(req,res,body);
+      });
+      return;
+    }
+    rt(req,res);
   };
   const ht={};
   enn.itrt([
@@ -189,12 +305,11 @@ console.log('miss');
     ht[meth.toLowerCase()]=(
       path,hndl,prnt=false
     )=>{
-      const ary=tr.val2(
+      tr.val2(
         [],
         meth,
         path
-      );
-      ary.push((req,res,opt)=>{
+      ).push((req,res,opt)=>{
         if(prnt || opt.me){
           hndl(req,res,opt);
         }
@@ -216,10 +331,10 @@ console.log('miss');
       /https:/
     ) && o.key && o.cert){
       ht.serv=require('https')
-        .createServer(o,rt);
+        .createServer(o,buf);
     }
     ht.serv=ht.serv || require('http')
-      .createServer(rt);
+      .createServer(buf);
     enn.itrt(ev,(name,hndl)=>{
       ht.serv.on(name,hndl);
     });

@@ -1,5 +1,4 @@
 /***
-test
   ennui.js is designed by mjusi, featured by: 
     * humor predefined data model
     * gradual levels of iteration
