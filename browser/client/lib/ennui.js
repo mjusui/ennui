@@ -1839,8 +1839,8 @@ enn.http.dat=(o,para)=>{
   let d=null;
   if(para && o.method!=='GET'){
     d=new FormData();
-    enn.itrt(o.para,(k,v)=>{
-      fd.append(k,v);
+    enn.itrt(para,(k,v)=>{
+      d.append(k,v);
     });
   }
   return d;
