@@ -22,82 +22,37 @@ ennui+='module.exports=enn;'
 
 fs.writeFileSync(dst,ennui);
 
-const undef=[
-  'elem',
-  'text',
-  'make',
-  'color',
-  'sock',
-  'clas',
-  'deco',
-  'http',
-];
 const enn=require(dst);
-enn.scan(undef,(idx,name)=>{
+enn.scan([
+  'elem','text','make',
+  'color','sock','clas',
+  'deco','tmpl'
+],(idx,name)=>{
   enn[name]=undefined;
 });
+enn.scan([
+  'req','dat'
+],(idx,name)=>{
+  enn.http[name]=undefined;
+});
 
-enn.http={};
-enn.http.pars=(opt={},ow={})=>{
-  const o={};
-  o.protocol=ow.protocol||ow.prot||
-    opt.protocol||opt.prot||'https:'
-  o.protocol=o.protocol.replace(/\/\/$/,'');
-  o.prot=o.protocol;
-  o.key=ow.key||opt.key;
-  o.cert=ow.cert||opt.cert;
-  o.hostname=ow.hostname||ow.host||
-    opt.hostname||opt.host||opt.dman;
-  o.family=ow.family||opt.family;
-  o.port=ow.port||opt.port;
-  o.localAddress=ow.localAddress||
-    opt.localAddress;
-  o.method=ow.method||opt.method||'GET';
-    o.method=o.method.toUpperCase();
-  o.path=ow.path||opt.path;
-  if(o.method==='GET'&&opt.para){
-    o.path+=`?${qs.stringify(opt.para)}`;
+enn.http.dat=(o,para)=>{
+  let d=null;
+  if(para && o.method!=='GET'){
+    d=qs.stringify(para);
   }
-  o.hash=ow.hash||opt.hash;
-  if(opt.hash){
-    o.path+=opt.hash;
-  }
-  o.headers=ow.headers||ow.header||
-    opt.headers||opt.header;
-  o.pass=ow.pass||ow.password||
-    opt.pass||opt.password;
-  o.user=ow.user||ow.username||
-    opt.user||opt.username;
-  o.auth=o.pass && `:${o.pass}`;
-    o.auth=`${o.user}${o.pass}`;
-  o.agent=ow.agent||opt.agent;
-  o.timeout=ow.timeout||ow.time||
-    ow.millisecond||ow.milli||ow.ms||
-    opt.timeout||opt.time||opt.millisecond||
-    opt.milli||opt.ms||(
-      ow.second||ow.seconds||ow.sec||ow.s||
-      opt.second||opt.seconds||opt.sec||opt.s
-    )*1000||(
-      ow.minute||ow.minutes||ow.min||ow.m||
-      opt.minute||opt.minutes||opt.min||opt.m
-    )*60*1000||2000;
-  return o;
+  return d;
 };
-enn.http.req=(method,opt,dry=false)=>{
-  const o=enn.http.pars(opt,{
+enn.http.req=(method,opt,hndl)=>{
+  const o=enn.http.prs(opt,{
     method:method,
   });
-  if(dry){
-    let url=o.protocol+'//';
-    url+=o.auth||'';
-    url+=o.hostname||'';
-    if(o.port){
-      url+=':'+o.port;
-    }
-    url+=o.path||'';
-    url+=o.hash||'';
+  let url=enn.http.bld(o,opt.para);
+
+  if(!hndl){
     return url;
   }
+
   let http=require('http');
   if(o.protocol==='https:')
     http=require('https');
@@ -108,30 +63,18 @@ enn.http.req=(method,opt,dry=false)=>{
       body+=chunk;
     });
     res.on('end',()=>{
-      opt.hndl(body);
+      hndl(body);
     });
   });
   req.on('error',(e)=>{
     console.log(e.message);
   });
-  let body=null;
-  if(o.method!=='GET'&&opt.para){
-    body=qs.stringify(opt.para);
-    req.write(body);
+
+  let data=enn.http.dat(o,opt.para);
+  if(data){
+    req.write(data);
   }
   req.end();
-};
-enn.http.get=(opt,dry)=>{
-  return enn.http.req('get',opt,dry);
-};
-enn.http.put=(opt,dry)=>{
-  return enn.http.req('put',opt,dry);
-};
-enn.http.post=(opt,dry)=>{
-  return enn.http.req('post',opt,dry);
-};
-enn.http.delete=(opt,dry)=>{
-  return enn.http.req('delete',opt,dry);
 };
 enn.http.resp=(cmmn=(res)=>{})=>{
   const sc=enn.cach()
@@ -205,7 +148,7 @@ enn.http.resp=(cmmn=(res)=>{})=>{
 enn.http.serv=(
   cmmn=(req,res,end)=>{},opt={}
 )=>{
-  const o=enn.http.pars(opt);
+  const o=enn.http.prs(opt);
   const tr=enn.tree();
   const ev={};
   let def=(req,res,opt)=>{};

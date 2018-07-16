@@ -1761,50 +1761,129 @@ enn.clock=(job,intv=1000)=>{
     if(stop)trig();
     },stop:()=>{q.push('stop');}};
 };*/
-enn.http={
-  req:(method,opt,dry)=>{
-    let url=opt.url;
-    if(opt.path)
-      url=url+opt.path;
-
-    let and=''
-    enn.itrt(opt.para||{},(k,v)=>{
-      url=`${url}${and}${k}=${v}`
-      and='&';
-    });
-
-    if(dry){
-      return url;
+enn.http={};
+enn.http.prs=(opt={},ow={})=>{
+  const o={};
+  o.url=ow.url||opt.url||'';
+  o.protocol=ow.protocol||ow.prot||
+    opt.protocol||opt.prot||'https:'
+  o.protocol=o.protocol.replace(/\/\/$/,'');
+  o.prot=o.protocol;
+  o.key=ow.key||opt.key||'';
+  o.cert=ow.cert||opt.cert||'';
+  o.hostname=ow.hostname||ow.host||
+    opt.hostname||opt.host||opt.dman||'';
+  o.family=ow.family||opt.family||'';
+  o.port=ow.port||opt.port||'';
+  o.localAddress=ow.localAddress||
+    opt.localAddress||'';
+  o.method=ow.method||opt.method||'GET';
+    o.method=o.method.toUpperCase();
+  o.path=ow.path||opt.path||'';
+  /*if(o.method==='GET'&&opt.para){
+    o.path+=`?${qs.stringify(opt.para)}`;
+  }*/
+  o.hash=ow.hash||opt.hash||'';
+  /*if(opt.hash){
+    o.path+=opt.hash;
+  }*/
+  o.headers=ow.headers||ow.header||
+    opt.headers||opt.header;
+  o.pass=ow.pass||ow.password||
+    opt.pass||opt.password||'';
+  o.user=ow.user||ow.username||
+    opt.user||opt.username||'';
+  o.auth=o.pass && `:${o.pass}`;
+    o.auth=`${o.user}${o.pass}`;
+  o.agent=ow.agent||opt.agent;
+  o.timeout=ow.timeout||ow.time||
+    ow.millisecond||ow.milli||ow.ms||
+    opt.timeout||opt.time||opt.millisecond||
+    opt.milli||opt.ms||(
+      ow.second||ow.seconds||ow.sec||ow.s||
+      opt.second||opt.seconds||opt.sec||opt.s
+    )*1000||(
+      ow.minute||ow.minutes||ow.min||ow.m||
+      opt.minute||opt.minutes||opt.min||opt.m
+    )*60*1000||2000;
+  return o;
+};
+enn.http.bld=(o,para)=>{
+  let url=o.url;
+  if(!url){
+    url+=`${o.protocol}\/\/`;
+    url+=o.auth||'';
+    url+=o.hostname||'';
+    if(o.port){
+      url+=`:${o.port}`;
     }
-
-    const req=new XMLHttpRequest();
-    req.open(method,url);
-
-    enn.itrt(opt.header||{},(k,v)=>{
-      req.setRequestHeader(k,v);
-    });
-
-    req.onreadystatechange=()=>{
-      if(req.readyState==req.DONE)opt.hndl(req);
-    };
-
-    let d=null;
-    if(opt.data)d=opt.data;
-    req.send(d);
-  },
-  head:(opt,dry=false)=>{return enn.http.req('HEAD',opt,dry);},
-  get:(opt,dry=false)=>{return enn.http.req('GET',opt,dry);},
-  post:(opt,dry=false)=>{return enn.http.req('POST',opt,dry);},
-  delete:(opt,dry=false)=>{return enn.http.req('DELETE',opt,dry);},
-  data:(k,v)=>{
-    const fd=new FormData();
-    fd.append(k,v);
-    const d={
-      end:()=>{return fd;},
-      apen:(k,v)=>{fd.append(k,v);return d;}
-    };
-    return d;
+    if(para && o.method==='GET'){
+      let q='?';
+      let cnt=0;
+      enn.itrt(para,(k,v)=>{
+        if(cnt++){
+          q+='&';
+        }
+        q+=`${k}=${v}`;
+      });
+      o.path+=q;
+    }
+    url+=o.path||'';
+    if(o.hash){
+      url+=`#${o.hash}`;
+    }
   }
+  return url;
+};
+enn.http.dat=(o,para)=>{
+  let d=null;
+  if(para && o.method!=='GET'){
+    d=new FormData();
+    enn.itrt(o.para,(k,v)=>{
+      fd.append(k,v);
+    });
+  }
+  return d;
+};
+enn.http.req=(method,opt,hndl)=>{
+  const o=enn.http.prs(opt,{
+    method:method,
+  });
+  let url=enn.http.bld(o,opt.para);
+
+  if(!hndl){
+    return url;
+  }
+
+  const req=new XMLHttpRequest();
+  req.open(method,url);
+
+  enn.itrt(o.headers||{},(k,v)=>{
+    req.setRequestHeader(k,v);
+  });
+
+  req.onreadystatechange=()=>{
+    if(req.readyState==req.DONE)
+      hndl(req.responseText);
+  };
+
+  req.send(
+    enn.http.dat(o,opt.para));
+};
+enn.http.head=(opt,hndl)=>{
+  return enn.http.req('HEAD',opt,hndl);
+};
+enn.http.get=(opt,hndl)=>{
+  return enn.http.req('GET',opt,hndl);
+};
+enn.http.put=(opt,hndl)=>{
+  return enn.http.req('PUT',opt,hndl);
+};
+enn.http.post=(opt,hndl)=>{
+  return enn.http.req('POST',opt,hndl);
+};
+enn.http.delete=(opt,hndl)=>{
+  return enn.http.req('DELETE',opt,hndl);
 };
 /*enn.load=(js,hndl)=>{
   const scr=enn.make('script');
