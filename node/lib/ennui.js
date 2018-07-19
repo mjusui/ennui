@@ -213,9 +213,7 @@ req={
         endall:end,
       });
     }, ...enn.splt(
-      url.parse(
-        req.url
-      ).pathname||'/', '/'
+      purl.pathname||'/', '/'
     )).sttl((one)=>{
       path=`${path}/${one}`;
       trig({

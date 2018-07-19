@@ -383,7 +383,7 @@ enn.type=(tgt,tname='obj',hndl)=>{
   if(hndl){
     return enn.type(
       tgt,tname
-    ) && hndl(tgt) || true;
+    ) && hndl(tgt);
   }
   let a=false;
   let o=false;
@@ -1061,9 +1061,56 @@ enn.tree=()=>{
       t.eval(name,hndl,...some);
       return t;
     },*/
-    set:(val,...some)=>{
-      t.val(val,...some);
+    bet1:(hndl,one)=>{
+      root.bet(one,hndl);
       return t;
+    },
+    bet2:(hndl,one,two)=>{
+      root.nest(one)
+        .bet(two,hndl);
+      return t;
+    },
+    bet3:(hndl,one,two,thr)=>{
+      root.nest(one)
+        .nest(two)
+        .bet(thr,hndl);
+      return t;
+    },
+    bet4:(hndl,one,two,thr,fou)=>{
+      root.nest(one)
+        .nest(two)
+        .nest(thr)
+        .bet(fou,hndl);
+      return t;
+    },
+    bet:(hndl,one,two,thr,fou,...some)=>{
+      if(some.length){
+        root.nest(one)
+          .nest(two)
+          .nest(thr)
+          .nest(fou);
+        enn.scan(some,(idx,fiv)=>{
+          root.nest(fiv);
+        },0,1);
+        root.bet(
+          some[some.length-1],
+          hndl
+        );
+      }else if(fou){
+        t.bet4(hndl,one,two,thr,fou);
+      }else if(thr){
+        t.bet3(hndl,one,two,thr);
+      }else if(two){
+        t.bet2(hndl,one,two);
+      }else if(one){
+        t.bet2(hndl,one);
+      }
+      return t;
+    },
+    set:(val,...some)=>{
+      return t.bet(()=>{
+        return val;
+      }, ...some);
     },
     get:(...some)=>{
       let bran=root;
