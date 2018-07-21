@@ -811,7 +811,7 @@ enn.cach=(cac={})=>{
       return c.get(name)||c.set(
         name,
         enn.cach()
-          .def(null)
+          .def(undefined)
       ).get(name);
     },
     eval:(name,hndl, ...arg)=>{
