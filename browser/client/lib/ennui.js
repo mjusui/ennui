@@ -386,49 +386,58 @@ enn.type=(tgt,tname='obj',hndl)=>{
     ) && hndl(tgt);
   }
   let a=false;
-  let o=false;
   let c=false;
+  let e=false;
+  let o=false;
   switch(tname){
-    case 'nl':tname='null';break;
-    case 'nll':tname='null';break;
-    case 'null':tname='null';break;
-    case 'udf':tname='undefined';break;
-    case 'undef':tname='undefined';break;
-    case 'undefine':tname='undefined';break;
-    case 'undefined':tname='undefined';break;
-    case 'o':tname='object';o=true;break;
-    case 'obj':tname='object';o=true;break;
-    case 'object':tname='object';o=true;break;
-    case 'b':tname='boolean';break;
-    case 'bl':tname='boolean';break;
-    case 'bool':tname='boolean';break;
-    case 'boolean':tname='boolean';break;
     case 'a':tname='object';a=true;break;
     case 'arr':tname='object';a=true;break;
     case 'ary':tname='object';a=true;break;
     case 'array':tname='object';a=true;break;
+    case 'b':tname='boolean';break;
+    case 'bl':tname='boolean';break;
+    case 'bool':tname='boolean';break;
+    case 'boolean':tname='boolean';break;
     case 'c':c=true;break;
     case 'col':c=true;break;
     case 'collect':c=true;break;
     case 'collection':c=true;break;
-    case 's':tname='string';break;
-    case 'str':tname='string';break;
-    case 'string':tname='string';break;
-    case 'n':tname='number';break;
-    case 'num':tname='number';break;
-    case 'number':tname='number';break;
+    case 'e':e=true;tname='enn';break;
+    case 'en':e=true;tname='enn';break;
+    case 'enn':e=true;tname='enn';break;
+    case 'ennui':e=true;tname='enn';break;
     case 'f':tname='function';break;
     case 'fnc':tname='function';break;
     case 'func':tname='function';break;
     case 'function':tname='function';break;
+    case 'n':tname='number';break;
+    case 'num':tname='number';break;
+    case 'number':tname='number';break;
+    case 'nl':tname='null';break;
+    case 'nll':tname='null';break;
+    case 'null':tname='null';break;
+    case 'o':tname='object';o=true;break;
+    case 'obj':tname='object';o=true;break;
+    case 'object':tname='object';o=true;break;
+    case 's':tname='string';break;
+    case 'str':tname='string';break;
+    case 'string':tname='string';break;
+    case 'udf':tname='undefined';break;
+    case 'undef':tname='undefined';break;
+    case 'undefine':tname='undefined';break;
+    case 'undefined':tname='undefined';break;
     default:tname='object';o=true;break;
   }
   if(a){
     return Array.isArray(tgt);
   }
   if(c){
-    return tgt.length
+    return tgt && tgt.length
       && enn.type(tgt.length,'n');
+  }
+  if(e){
+    return tgt && tgt.type
+      && tgt.type === 'enn';
   }
   if(o){
 console.log(typeof tgt);
@@ -778,6 +787,7 @@ enn.cach=(cac={})=>{
   def.ini=def.def
   let csr=null;
   const c={
+    type:'enn',
     rst:(k=null)=>{
       csr=k && cac.get(k);
       return c;
@@ -815,8 +825,7 @@ enn.cach=(cac={})=>{
       ).get(name);
     },
     bet:(k,h,...a)=>{
-      cac[k]=h(...a);
-      return c;
+      return c.set(k,h(...a));
     },
     set:(k,v)=>{
       cac[k]=v;
@@ -826,7 +835,7 @@ enn.cach=(cac={})=>{
       return cac[k]||def.ini(k);
     },
     del:(k)=>{
-      cac[k]=undefined;
+      c.set(k,undefined);
       return c;
     },
     rmap:(hndl,trim=false)=>{
@@ -855,6 +864,7 @@ enn.chan=(v=null)=>{
     return l;
   };
   const c={
+    type:'enn',
     add:(v,fil=false)=>{
       if(fil&&len&&!csr.val){
         c.mod(v);
@@ -956,6 +966,7 @@ enn.crwn=(opt={})=>{
     .def(null);
   const chan=enn.chan();
   const c={
+    type:'enn',
     bak:()=>{
       chan.bak();
       return c;
@@ -990,6 +1001,7 @@ enn.tree=()=>{
   const root=enn.cach()
     .def(null);
   const t={
+    type:'enn',
     eval1:(hndl,one)=>{
       return root.eval(one,hndl);
     },
@@ -1122,6 +1134,35 @@ enn.tree=()=>{
   };
   return t;
 };
+const obsv={};
+enn.scan([
+  'cach',
+],(idx,name)=>{
+  obsv[name]=(...arg)=>{
+    const hd=enn.cach()
+      .def(undefined);
+    const c=enn[name](...arg);
+    const set=c.set;
+    c.set=(name,val)=>{
+      const ret=set(name,val);
+      enn.scan(hd.get(name)||[],(idx,hndl)=>{
+        hndl(name,val);
+      });
+      return ret;
+    };
+    c.on=(hndl,...some)=>{
+      enn.scan(some,(idx,name)=>{
+        hd.val(
+          name, []
+        ).push(hndl);
+      });
+      return c;
+    };
+    return c;
+  };
+});
+enn.obsv=obsv;
+
 const pal={
   nil:{r:0,g:0,b:0,a:0}
 };
@@ -1717,6 +1758,11 @@ enn.tmpl.text=(...arg)=>{
     enn.text, ...arg
   );
 };
+
+enn.pose=(mname)=>{
+
+};
+
 enn.rand=(mult=17)=>{
   return Math.floor(
     Math.random() * 10**mult
