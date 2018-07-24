@@ -317,65 +317,49 @@ enn.key=(obj)=>{
   return Object.keys(obj);
 };
 enn.regex=(txt,f='g')=>{
-  let rgx=null;
+  let rgx=new RegExp(txt,f);
   return {
-    tst:(tgt,hndl)=>{
-      if(hndl){
-        return enn.regex(txt,f)
-          .tst(tgt) && hndl();
-      }
-      rgx=rgx||new RegExp(txt,f);
-      return rgx.test(tgt);
-    },
-    sch:(tgt,hndl)=>{
-      if(hndl){
-        return hndl(
-          enn.regex(txt,f)
-            .sch(tgt)
-        );
-      }
-      rgx=rgx||new RegExp(txt,f);
-      return tgt.search(rgx);
-    },
-    spl:(tgt,hndl)=>{
-      if(hndl){
-        return hndl(
-          enn.regex(txt,f)
-            .spl(tgt)
-        );
-      }
-      rgx=rgx||new RegExp(txt,f);
-      return tgt.split(rgx);
-    },
     exe:(tgt,hndl)=>{
+      let res=rgx.exec(tgt);
       if(hndl){
-        return hndl(
-          enn.regex(txt,f)
-            .exec(tgt)
-        );
+        return hndl(res);
       }
-      rgx=rgx||new RegExp(txt,f);
-      return rgx.exec(tgt);
+      return res;
     },
-    rep:(tgt,ins,hndl)=>{
+    tst:(tgt,hndl)=>{
+      let res=rgx.test(tgt);
       if(hndl){
-        return hndl(
-          enn.regex(txt,f)
-            .rep(tgt)
-        );
+        return res && hndl(tgt) || res;
       }
-      rgx=rgx||new RegExp(txt,f);
-      return tgt.replace(rgx,ins);
+      return res;
     },
     mch:(tgt,hndl)=>{
+      let res=tgt.match(rgx);
       if(hndl){
-        return hndl(
-          enn.regex(txt,f)
-            .mch(tgt)
-        );
+        return hndl(res);
       }
-      rgx=rgx||new RegExp(txt,f);
-      return tgt.match(rgx);
+      return res;
+    },
+    sch:(tgt,hndl)=>{
+      let res=tgt.search(rgx);
+      if(hndl){
+        return hndl(res);
+      }
+      return res;
+    },
+    rep:(tgt,ins,hndl)=>{
+      let res=tgt.replace(rgx,ins);
+      if(hndl){
+        return hndl(res);
+      }
+      return res;
+    },
+    spl:(tgt,hndl)=>{
+      let res=tgt.split(rgx);
+      if(hndl){
+        return hndl(res);
+      }
+      return res;
     },
   };
 };
@@ -799,6 +783,14 @@ enn.cach=(cac={})=>{
     });
     return c;
   };
+  const lab={};
+  const det=(k,l,hndl=(k,l)=>{})=>{
+    enn.scan(l,(idx,l)=>{
+      lab[l]=( lab[l]||' ' )
+        .replace(` ${k} `);
+      hndl(k,l);
+    });
+  };
   const c={
     type:'enn',
     trig:(yes=true)=>{
@@ -807,6 +799,25 @@ enn.cach=(cac={})=>{
       }else{
         c.set=set.set;
       }
+      return c;
+    },
+    lab:(l,hndl)=>{
+      return enn.scan(enn.splt(
+        lab[l]), (idx,k,end)=>{
+        const v=c.get(k);
+        if(v){
+          hndl(k,v,end);
+        }
+      })||c;
+    },
+    att:(k, ...l)=>{
+      det(k,l,(k,l)=>{
+        lab[l]=`${lab[l]||' '}${k} `;
+      });
+      return c;
+    },
+    det:(k, ...l)=>{
+      det(k, ...l);
       return c;
     },
     rst:(k=null)=>{
