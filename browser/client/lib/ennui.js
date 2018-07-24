@@ -780,14 +780,35 @@ enn.clon=(obj={},literal=false)=>{
 };
 enn.cach=(cac={})=>{
   const def={};
-  def.val=null;
+  def.val=undefined;
   def.def=()=>{
     return def.val;
   };
   def.ini=def.def
   let csr=null;
+  const hd={};
+  const set={};
+  set.set=(k,v)=>{
+    cac[k]=v;
+    return c;
+  };
+  set.trig=(k,v)=>{
+    set.set(k,v);
+    enn.scan(hd[k]||[],(idx,hndl)=>{
+      hndl(k,v);
+    });
+    return c;
+  };
   const c={
     type:'enn',
+    trig:(yes=true)=>{
+      if(yes){
+        c.set=set.trig;
+      }else{
+        c.set=set.set;
+      }
+      return c;
+    },
     rst:(k=null)=>{
       csr=k && cac.get(k);
       return c;
@@ -811,7 +832,7 @@ enn.cach=(cac={})=>{
       return c.get(name)||c.set(
         name,
         enn.cach()
-          .def(undefined)
+          .def(def.val)
       ).get(name);
     },
     eval:(name,hndl, ...arg)=>{
@@ -827,8 +848,12 @@ enn.cach=(cac={})=>{
     bet:(k,h,...a)=>{
       return c.set(k,h(...a));
     },
-    set:(k,v)=>{
-      cac[k]=v;
+    set:set.set,
+    on:(hndl, ...key)=>{
+      enn.scan(key,(idx,k)=>{
+        hd[k]=hd[k]||[];
+        hd[k].push(hndl);
+      });
       return c;
     },
     get:(k)=>{
@@ -1134,35 +1159,6 @@ enn.tree=()=>{
   };
   return t;
 };
-const obsv={};
-enn.scan([
-  'cach',
-],(idx,name)=>{
-  obsv[name]=(...arg)=>{
-    const hd=enn.cach()
-      .def(undefined);
-    const c=enn[name](...arg);
-    const set=c.set;
-    c.set=(name,val)=>{
-      const ret=set(name,val);
-      enn.scan(hd.get(name)||[],(idx,hndl)=>{
-        hndl(name,val);
-      });
-      return ret;
-    };
-    c.on=(hndl,...some)=>{
-      enn.scan(some,(idx,name)=>{
-        hd.val(
-          name, []
-        ).push(hndl);
-      });
-      return c;
-    };
-    return c;
-  };
-});
-enn.obsv=obsv;
-
 const pal={
   nil:{r:0,g:0,b:0,a:0}
 };
