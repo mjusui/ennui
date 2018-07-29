@@ -762,6 +762,45 @@ enn.clon=(obj={},literal=false)=>{
   return c;
 
 };
+enn.labl=(lab={})=>{
+  const det=(tgt,lbl,hndl=(tgt,lbl)=>{})=>{
+    enn.scan(lbl,(idx,lbl)=>{
+      lab[lbl]=( lab[lbl]||' ' )
+        .replace(` ${tgt} `,' ');
+      hndl(tgt,lbl);
+    });
+  };
+  const l={
+    see:(lbl,hndl)=>{
+      return enn.scan(enn.splt(
+        lab[lbl]||' '
+      ),(idx,tgt,end)=>{
+        hndl(idx,tgt,end);
+      });
+    },
+    /*lab:(l,hndl)=>{
+      return enn.scan(enn.splt(
+        lab[l]
+      ),(idx,k,end)=>{
+        const v=c.get(k);
+        if(v){
+          hndl(k,v,end);
+        }
+      })||c;
+    },*/
+    att:(tgt, ...lbl)=>{
+      det(tgt,lbl,(tgt,lbl)=>{
+        lab[lbl]=`${lab[lbl]||' '}${tgt} `;
+      });
+      return l;
+    },
+    det:(tgt, ...lbl)=>{
+      det(tgt,lbl);
+      return l;
+    },
+  };
+  return l;
+};
 enn.cach=(cac={})=>{
   const def={};
   def.val=undefined;
@@ -776,34 +815,54 @@ enn.cach=(cac={})=>{
     cac[k]=v;
     return c;
   };
-  set.trig=(k,v)=>{
+  let pub=false;
+  set.pub=(k,v)=>{
     set.set(k,v);
     enn.scan(hd[k]||[],(idx,hndl)=>{
       hndl(k,v);
     });
     return c;
   };
-  const lab={};
+  const lab=enn.labl();
+  /*const lab={};
   const det=(k,l,hndl=(k,l)=>{})=>{
     enn.scan(l,(idx,l)=>{
       lab[l]=( lab[l]||' ' )
         .replace(` ${k} `);
       hndl(k,l);
     });
-  };
+  };*/
   const c={
     type:'enn',
-    trig:(yes=true)=>{
+    pub:(yes=true)=>{
       if(yes){
-        c.set=set.trig;
+        c.set=set.pub;
       }else{
         c.set=set.set;
       }
+      tri=yes;
       return c;
     },
     lab:(l,hndl)=>{
+      return lab.see(l,(idx,k,end)=>{
+        const v=c.get(k);
+        if(v){
+          hndl(k,v,end);
+        }
+      })||c;
+    },
+    att:(...arg)=>{
+      lab.att(...arg);
+      return c;
+    },
+    det:(...arg)=>{
+      lab.det(...arg);
+      return c;
+    },
+    /*lab:(l,hndl)=>{
       return enn.scan(enn.splt(
-        lab[l]), (idx,k,end)=>{
+        lab[l]
+      ),(idx,k,end)=>{
         const v=c.get(k);
         if(v){
           hndl(k,v,end);
@@ -819,7 +878,7 @@ enn.cach=(cac={})=>{
     det:(k, ...l)=>{
       det(k, ...l);
       return c;
-    },
+    },*/
     rst:(k=null)=>{
       csr=k && cac.get(k);
       return c;
@@ -839,13 +898,42 @@ enn.cach=(cac={})=>{
       def.ini=hndl;
       return c;
     },
+    bulb:(name,stock)=>{
+      return (stock||enn.cach()
+        .def(def.val)
+        .pub(pub)
+      ).set(name,c);
+    },
+    nest:(name,scion)=>{
+      return c.eval(name,()=>{
+        return scion||enn.cach()
+          .def(def.val)
+          .pub(pub);
+      });
+    },
+    /*nest:(name)=>{
+      return c.eval(name,()=>{
+        return enn.cach()
+          .def(def.val)
+          .pub(pub);
+      });
+    },
+    nest:(name)=>{
+      return c.get(name)||c.bet(
+        name,()=>{
+          return enn.cach()
+            .def(def.val)
+            .pub(pub)
+      }).get(name);
+    },
     nest:(name)=>{
       return c.get(name)||c.set(
         name,
         enn.cach()
           .def(def.val)
+          .pub(pub)
       ).get(name);
-    },
+    },*/
     eval:(name,hndl, ...arg)=>{
       return c.get(name)||c.bet(
         name,hndl,...arg
@@ -860,7 +948,7 @@ enn.cach=(cac={})=>{
       return c.set(k,h(...a));
     },
     set:set.set,
-    on:(hndl, ...key)=>{
+    sub:(hndl, ...key)=>{
       enn.scan(key,(idx,k)=>{
         hd[k]=hd[k]||[];
         hd[k].push(hndl);
@@ -1034,10 +1122,22 @@ enn.crwn=(opt={})=>{
   return c;
 };
 enn.tree=()=>{
-  const root=enn.cach()
-    .def(null);
+  let root=enn.cach()
   const t={
     type:'enn',
+    def:root.def,
+    pub:root.pub,
+    lab:root.lab,
+    att:root.att,
+    det:root.det,
+    bulb:(...arg)=>{
+      root=root.bulb(...arg);
+      return t;
+    },
+    nest:(...arg)=>{
+      root=root.nest(...arg);
+      return t;
+    },
     eval1:(hndl,one)=>{
       return root.eval(one,hndl);
     },
@@ -1170,6 +1270,111 @@ enn.tree=()=>{
   };
   return t;
 };
+/*enn.star=(core={})=>{
+  const coat=enn.cach()
+    .def(undefined);
+  let grav=(opt)=>{
+    return opt;
+  };
+  const s={};
+
+  s.cor=(opt)=>{
+    core=opt||core;
+    return s;
+  };
+  s.coa=(name, ...key)=>{
+    coat.val(name,key);
+    return s;
+  };
+  s.grav=(hndl)=>{
+    grav=hndl||grav;
+    return s;
+  };
+
+  s.nov=(name, ...val)=>{
+    const n=enn.clon(cor)
+    enn.scan(
+      coat.get(name)||[],
+    (idx,k)=>{
+      n.mod(k,val[idx]); 
+    });
+    return enn.cach(grav(
+      n.end()
+    )).def(undefined)
+    .pub(true);
+  };
+  return s;
+};*/
+enn.schm=(name,hndl)=>{
+  const s={};
+
+  const sch=enn.cach()
+    .def(undefined);
+  let schm=null;
+  s.schm=(sname,hndl=(...arg)=>{})=>{
+    schm=sch.eval(name,()=>{
+      return hndl;
+    });
+    return s;
+  };
+  s.schm(name,hndl);
+
+  const inst=enn.cach()
+    .def(undefined);
+  s.add=(name,...arg)=>{
+    inst.eval(name,schm,...arg);
+    return s;
+  };
+  s.mod=(name,...arg)=>{
+    inst.bet(name,schm,...arg);
+    return s;
+  };
+  s.see=(name,hndl)=>{
+    if(hndl){
+      hndl(
+        inst.get(name)
+      );
+      return s;
+    }
+    return inst.get(name);
+  };
+  s.del=(name)=>{
+    inst.del(name);
+    return s;
+  };
+
+  const rel=enn.cach()
+    .def(undefined)
+    .pub(true); 
+  const link=(meth,name,src,dst,back=true)=>{
+    const link=rel.eval(name,()=>{
+      return enn.labl();
+    })[meth](src,dst);
+    if(back)
+      link[meth](dst,src);
+  };
+  s.lnk=(...arg)=>{
+    link('att',...arg);
+    return s;
+  };
+  s.ulk=(...arg)=>{
+    link('det',...arg);
+    return s;
+  };
+  s.uln=s.ulk;
+  s.rel=(name,src,hndl)=>{
+    rel.get(name)
+      .see(src,(idx,k,end)=>{
+        const v=inst.get(k);
+        if(v)
+          hndl(k,v,end);
+      });
+    return s;
+  };
+
+  return s;
+};
+
 const pal={
   nil:{r:0,g:0,b:0,a:0}
 };
@@ -1840,27 +2045,6 @@ enn.clock=(job,intv=1000)=>{
   };
   return c;
 };
-/*enn.clock=(job,interval=1000)=>{
-  let stop=false;
-  const q=enn.queu();
-  const flush=()=>{
-    q.flu((o)=>{switch(o){
-      case 'run':stop=false;break;
-      case 'stop':stop=true;break;
-    }
-    return stop;
-  });};
-  const trig=()=>{
-    job();
-    if(flush())return;
-    setTimeout(()=>{trig();},interval);
-  };
-  trig();
-  return {run:()=>{
-    q.push('run');
-    if(stop)trig();
-    },stop:()=>{q.push('stop');}};
-};*/
 enn.http={};
 enn.http.prs=(opt={},ow={})=>{
   const o={};
