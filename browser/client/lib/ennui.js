@@ -762,45 +762,6 @@ enn.clon=(obj={},literal=false)=>{
   return c;
 
 };
-enn.labl=(lab={})=>{
-  const det=(tgt,lbl,hndl=(tgt,lbl)=>{})=>{
-    enn.scan(lbl,(idx,lbl)=>{
-      lab[lbl]=( lab[lbl]||' ' )
-        .replace(` ${tgt} `,' ');
-      hndl(tgt,lbl);
-    });
-  };
-  const l={
-    see:(lbl,hndl)=>{
-      return enn.scan(enn.splt(
-        lab[lbl]||' '
-      ),(idx,tgt,end)=>{
-        hndl(idx,tgt,end);
-      });
-    },
-    /*lab:(l,hndl)=>{
-      return enn.scan(enn.splt(
-        lab[l]
-      ),(idx,k,end)=>{
-        const v=c.get(k);
-        if(v){
-          hndl(k,v,end);
-        }
-      })||c;
-    },*/
-    att:(tgt, ...lbl)=>{
-      det(tgt,lbl,(tgt,lbl)=>{
-        lab[lbl]=`${lab[lbl]||' '}${tgt} `;
-      });
-      return l;
-    },
-    det:(tgt, ...lbl)=>{
-      det(tgt,lbl);
-      return l;
-    },
-  };
-  return l;
-};
 enn.cach=(cac={})=>{
   const def={};
   def.val=undefined;
@@ -823,15 +784,14 @@ enn.cach=(cac={})=>{
     });
     return c;
   };
-  const lab=enn.labl();
-  /*const lab={};
+  const lab={};
   const det=(k,l,hndl=(k,l)=>{})=>{
     enn.scan(l,(idx,l)=>{
       lab[l]=( lab[l]||' ' )
-        .replace(` ${k} `);
+        .replace(` ${k} `,' ');
       hndl(k,l);
     });
-  };*/
+  };
   const c={
     type:'enn',
     pub:(yes=true)=>{
@@ -844,22 +804,6 @@ enn.cach=(cac={})=>{
       return c;
     },
     lab:(l,hndl)=>{
-      return lab.see(l,(idx,k,end)=>{
-        const v=c.get(k);
-        if(v){
-          hndl(k,v,end);
-        }
-      })||c;
-    },
-    att:(...arg)=>{
-      lab.att(...arg);
-      return c;
-    },
-    det:(...arg)=>{
-      lab.det(...arg);
-      return c;
-    },
-    /*lab:(l,hndl)=>{
       return enn.scan(enn.splt(
         lab[l]
       ),(idx,k,end)=>{
@@ -876,9 +820,21 @@ enn.cach=(cac={})=>{
       return c;
     },
     det:(k, ...l)=>{
-      det(k, ...l);
+      det(k,l);
       return c;
-    },*/
+    },
+    ref:(hndl)=>{
+      hndl(c);
+      return c;
+    },
+    test:(val,hndl,hndl2)=>{
+      if(val){
+        c.ref(hndl);
+      }else if(hndl2){
+        c.ref(hndl2);
+      }
+      return c;
+    },
     rst:(k=null)=>{
       csr=k && cac.get(k);
       return c;
@@ -1270,41 +1226,6 @@ enn.tree=()=>{
   };
   return t;
 };
-/*enn.star=(core={})=>{
-  const coat=enn.cach()
-    .def(undefined);
-  let grav=(opt)=>{
-    return opt;
-  };
-  const s={};
-
-  s.cor=(opt)=>{
-    core=opt||core;
-    return s;
-  };
-  s.coa=(name, ...key)=>{
-    coat.val(name,key);
-    return s;
-  };
-  s.grav=(hndl)=>{
-    grav=hndl||grav;
-    return s;
-  };
-
-  s.nov=(name, ...val)=>{
-    const n=enn.clon(cor)
-    enn.scan(
-      coat.get(name)||[],
-    (idx,k)=>{
-      n.mod(k,val[idx]); 
-    });
-    return enn.cach(grav(
-      n.end()
-    )).def(undefined)
-    .pub(true);
-  };
-  return s;
-};*/
 enn.schm=(name,hndl)=>{
   const s={};
 
@@ -1343,32 +1264,27 @@ enn.schm=(name,hndl)=>{
     return s;
   };
 
-  const rel=enn.cach()
-    .def(undefined)
-    .pub(true); 
-  const link=(meth,name,src,dst,back=true)=>{
-    const link=rel.eval(name,()=>{
-      return enn.labl();
-    })[meth](src,dst);
-    if(back)
-      link[meth](dst,src);
-  };
-  s.lnk=(...arg)=>{
-    link('att',...arg);
+  s.lnk=(name,hndl)=>{
+    hndl((src,dst,back=true)=>{
+      inst.att(dst,`${name}-${src}`)
+        .test(back,(inst)=>{
+          inst.att(src,`${name}-${dst}`);
+        });
+    });
     return s;
   };
-  s.ulk=(...arg)=>{
-    link('det',...arg);
+  s.ulk=(name,hndl)=>{
+    hndl((src,dst,back=true)=>{
+      inst.det(dst,`${name}-${src}`)
+        .test(back,(inst)=>{
+          inst.det(src,`${name}-${dst}`);
+        });
+    });
     return s;
   };
   s.uln=s.ulk;
   s.rel=(name,src,hndl)=>{
-    rel.get(name)
-      .see(src,(idx,k,end)=>{
-        const v=inst.get(k);
-        if(v)
-          hndl(k,v,end);
-      });
+    inst.lab(`${name}-${src}`,hndl);
     return s;
   };
 
