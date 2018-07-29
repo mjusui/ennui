@@ -840,7 +840,7 @@ enn.cach=(cac={})=>{
       }else{
         c.set=set.set;
       }
-      tri=yes;
+      pub=yes;
       return c;
     },
     lab:(l,hndl)=>{
