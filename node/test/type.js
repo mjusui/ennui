@@ -5,3 +5,7 @@ console.log(
     return val;
   })
 );
+
+console.log(
+  typeof undefined
+);

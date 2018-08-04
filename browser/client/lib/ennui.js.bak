@@ -406,7 +406,6 @@ enn.type=(tgt,tname='obj',hndl)=>{
     case 's':tname='string';break;
     case 'str':tname='string';break;
     case 'string':tname='string';break;
-    case 'u':tname='undefined';break;
     case 'udf':tname='undefined';break;
     case 'undef':tname='undefined';break;
     case 'undefine':tname='undefined';break;
@@ -425,6 +424,7 @@ enn.type=(tgt,tname='obj',hndl)=>{
       && tgt.type === 'enn';
   }
   if(o){
+console.log(typeof tgt);
     return typeof tgt===tname &&
       !Array.isArray(tgt);
   }
@@ -581,9 +581,9 @@ enn.stat=(name,obj={})=>{
       cur=stt[name]||cur;
       return s;
     },
-    act:(name,...arg)=>{
+    act:(name,arg)=>{
       if(cur[name])
-        cur[name](...arg);
+        cur[name](arg);
       return s;
     },
     on:(name,hndl,oname)=>{
@@ -1077,52 +1077,22 @@ enn.crwn=(opt={})=>{
   };
   return c;
 };
-enn.tree=(root)=>{
-  root=root||enn.cach();
+enn.tree=()=>{
+  let root=enn.cach()
   const t={
     type:'enn',
-    def:(...arg)=>{
-      root.def(...arg);
+    def:root.def,
+    pub:root.pub,
+    lab:root.lab,
+    att:root.att,
+    det:root.det,
+    bulb:(...arg)=>{
+      root=root.bulb(...arg);
       return t;
     },
-    pub:(...arg)=>{
-      root.pub(...arg);
+    nest:(...arg)=>{
+      root=root.nest(...arg);
       return t;
-    },
-    lab:(...arg)=>{
-      root.lab(...arg);
-      return t;
-    },
-    att:(...arg)=>{
-      root.att(...arg);
-      return t;
-    },
-    det:(...arg)=>{
-      root.det(...arg);
-      return t;
-    },
-    scop:(...sco)=>{
-      return enn.tree(t.nest(
-        ...sco
-      ));
-    },
-    root:(rt)=>{
-      root=rt;
-      return t;
-    },
-    nest:(...some)=>{
-      let bran=root;
-      enn.scan(some,(idx,one)=>{
-        bran=bran.nest(one);
-      });
-      return bran;
-    },
-    bulb:(...some)=>{
-      let bran=root;
-      enn.scan(some,(idx,one)=>{
-        bran=bran.bulb(one);
-      });
-      return bran;
     },
     eval1:(hndl,one)=>{
       return root.eval(one,hndl);
@@ -1218,16 +1188,15 @@ enn.tree=(root)=>{
       return t;
     },
     bet:(hndl,one,two,thr,fou,...some)=>{
-      let bran=root;
       if(some.length){
-        bran=bran.nest(one)
+        root.nest(one)
           .nest(two)
           .nest(thr)
           .nest(fou);
         enn.scan(some,(idx,fiv)=>{
-          bran=bran.nest(fiv);
+          root.nest(fiv);
         },0,1);
-        bran=bran.bet(
+        root.bet(
           some[some.length-1],
           hndl
         );
@@ -1238,7 +1207,7 @@ enn.tree=(root)=>{
       }else if(two){
         t.bet2(hndl,one,two);
       }else if(one){
-        t.bet1(hndl,one);
+        t.bet2(hndl,one);
       }
       return t;
     },
@@ -1247,14 +1216,10 @@ enn.tree=(root)=>{
         return val;
       }, ...some);
     },
-    del:(...some)=>{
-      t.set(undefined,...some);
-      return t;
-    },
     get:(...some)=>{
       let bran=root;
       enn.scan(some,(idx,name,end)=>{
-        bran=bran.get(name)||end(undefined);
+        bran=bran.get(name)||end(null);
       });
       return bran;
     },
@@ -1262,89 +1227,102 @@ enn.tree=(root)=>{
   return t;
 };
 
-enn.schm=(name,hndl)=>{
-  const inst=enn.tree()
-    .def(undefined);
-  const sch=enn.cach()
-    .def(undefined);
-  const all={};  
+/****************
+{scname}/'cmmn'/hndl
+{scname}/'inst'/{instname}/{key}/{val}
+{scname}/cmmn/hndl
+{scname}/cmmn/hndl
+{scname}/cmmn/hndl
+****************/
+enn.schm=(sname)=>{
+  const s={};
 
-  let schm=null;
-  all.schm=(name,hndl)=>{
-    schm=sch.eval(name,()=>{
-      return hndl;
-    });
-    return all;
+  let las=false;
+  s.done=(hndl)=>{
+    if(las)
+      hndl();
+    return s;
   };
-  all.schm(name,hndl);
-
-  const sc=enn.tree()
-    .def(undefined);
-  all.scop=(...sco)=>{
-    const sub=sc.eval(()=>{
-      return inst.scop(...sco);
-    },...sco);
-    let done=false;
-    const s={};
-    s.done=(hndl)=>{
-      if(done)
-        hndl(s)
-      return s;
-    };
-    s.gone=(hndl)=>{
-      if(!done)
-        hndl(s);
-      return s;
-    };
-
-    const cast=(...arg)=>{
-      return enn.cach(
-        schm(...arg)
-      ).def(undefined)
-      .pub(true);
-    };
-    s.add=(name,...arg)=>{
-      done=false;
-      sub.eval1(()=>{
-        done=true;
-        return cast(name,...arg);
-      },name);
-      return s;
-    };
-    s.mod=(name,...arg)=>{
-      done=false;
-      sub.bet1(()=>{
-        done=true;
-        return cast(name,...arg);
-      },name);
-      return s; 
-    };
-    s.del=(name)=>{
-      done=false;
-      enn.type(sub.del(name)
-        .get(name),'u',(val)=>{
-        done=true;
-      });
-      return s;
-    };
-    s.see=(name,hndl)=>{
-      done=false;
-      const val=sub.get(name);
-      if(enn.type(val,'u')){
-        return s
-      }
-      done=true;
-      if(hndl){
-        hndl(val);
-        return s;
-      }
-      return val;
-    };
-
+  s.gone=(hndl)=>{
+    if(!las)
+      hndl();
     return s;
   };
 
-  return all;
+  let schm=null;
+  const cmmn=enn.cach()
+    .def(undefined);
+  let inst=null;
+  const ins=enn.cach()
+    .def(undefined);
+  s.cmmn=(hndl=(...arg)=>{})=>{
+    las=false;
+
+    inst=ins.get(name);
+    
+
+    if(hndl){
+      schm=sch.eval(name,()=>{
+        las=las && true;
+        return hndl;
+      });
+      return s;
+    }
+    enn.type(sch.get(name),'f',(val)=>{
+      las++;
+      schm=val;
+    });
+    return s;
+  };
+  s.schm(name,hndl);
+
+  s.add=(name,...arg)=>{
+    inst.eval(name,schm,...arg);
+    return s;
+  };
+  s.mod=(name,...arg)=>{
+    inst.bet(name,schm,...arg);
+    return s;
+  };
+  s.see=(name,hndl)=>{
+    if(hndl){
+      hndl(
+        inst.get(name)
+      );
+      return s;
+    }
+    return inst.get(name);
+  };
+  s.del=(name)=>{
+    inst.del(name);
+    return s;
+  };
+
+  s.lnk=(name,hndl)=>{
+    hndl((src,dst,back=true)=>{
+      inst.att(dst,`${name}-${src}`)
+        .test(back,(inst)=>{
+          inst.att(src,`${name}-${dst}`);
+        });
+    });
+    return s;
+  };
+  s.ulk=(name,hndl)=>{
+    hndl((src,dst,back=true)=>{
+      inst.det(dst,`${name}-${src}`)
+        .test(back,(inst)=>{
+          inst.det(src,`${name}-${dst}`);
+        });
+    });
+    return s;
+  };
+  s.uln=s.ulk;
+  s.rel=(name,src,hndl)=>{
+    inst.lab(`${name}-${src}`,hndl);
+    return s;
+  };
+
+  return s;
 };
 
 const pal={
