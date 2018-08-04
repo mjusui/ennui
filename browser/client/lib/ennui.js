@@ -1269,21 +1269,20 @@ enn.schm=(name,hndl)=>{
     .def(undefined);
   const all={};  
 
-  let schm=null;
   all.schm=(name,hndl)=>{
     schm=sch.eval(name,()=>{
       return hndl;
     });
     return all;
   };
-  all.schm(name,hndl);
 
-  const sc=enn.tree()
-    .def(undefined);
+  /*const sc=enn.tree()
+    .def(undefined);*/
   all.scop=(...sco)=>{
-    const sub=sc.eval(()=>{
+    const sub=inst.scop(...sco);
+    /*const sub=sc.eval(()=>{
       return inst.scop(...sco);
-    },...sco);
+    },...sco);*/
     let done=false;
     const s={};
     s.done=(hndl)=>{
@@ -1296,6 +1295,18 @@ enn.schm=(name,hndl)=>{
         hndl(s);
       return s;
     };
+
+    let schm=null;
+    s.schm=(name,hndl)=>{
+      done=false;
+      schm=sch.eval(name,()=>{
+        return hndl;
+      });
+      if(schm)
+        done=true;
+      return s;
+    };
+    s.schm(name,hndl);
 
     const cast=(...arg)=>{
       return enn.cach(
