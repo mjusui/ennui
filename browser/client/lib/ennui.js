@@ -85,7 +85,7 @@ enn.loop=(len,hndl,hed=0,tal=0)=>{
   const end=(r)=>{
     cnt=len;
     res=r;
-    return r;
+    return res;
   };
   while(cnt < len){
     hndl(cnt++,end);
@@ -94,7 +94,7 @@ enn.loop=(len,hndl,hed=0,tal=0)=>{
 };
 enn.scan=(ary,hndl,hed=0,tal=0)=>{
   return enn.loop(ary.length,(cnt,end)=>{
-    return hndl(cnt,ary[cnt],end);
+    hndl(cnt,ary[cnt],end);
   },hed,tal);
 };
 enn.nmbr=(len)=>{
@@ -103,6 +103,13 @@ enn.nmbr=(len)=>{
   });
 };
 enn.itrt=(obj,hndl)=>{
+  return enn.scan(
+    Object.keys(obj),
+  (idx,name,end)=>{
+    hndl(name,obj[name],end);
+  });
+};
+/*enn.itrt=(obj,hndl)=>{
   const key=enn.key(obj);
   const len=key.length;
   let cnt=0;
@@ -117,7 +124,7 @@ enn.itrt=(obj,hndl)=>{
     hndl(k,obj[k],end);
   }
   return res;
-};
+};*/
 enn.flat=(some,hndl)=>{
   let cnt=0
   let fin=false;
@@ -147,6 +154,43 @@ enn.flat=(some,hndl)=>{
   nest(some,hndl);
   return ret;
 };
+enn.seri={};
+enn.seri.loop=(len,hndl,hed=0,tel=0)=>{
+  len=len - tel;
+  let cnt=0 + hed;
+  let res=undefined;
+  const end=(r)=>{
+    cnt=len;
+    res=r;
+    return res;
+  };
+  let ready=(res)=>{};
+  const next=()=>{
+    if(cnt < len){
+      hndl(cnt++,next,end);
+      return;
+    }
+    ready(res);
+  };
+  return {
+    ready:(hndl)=>{
+      ready=hndl||ready;
+      next();
+    },
+  };
+};
+enn.seri.scan=(ary,hndl,hed=0,tal=0)=>{
+  return enn.seri.loop(ary.length,(cnt,next,end)=>{
+    hndl(cnt,ary[cnt],next,end);
+  },hed,tal);
+};
+enn.seri.itrt=(obj,hndl)=>{
+  return enn.seri.scan(
+    Object.keys(obj),
+  (idx,name,next,end)=>{
+    hndl(name,obj[name],next,end);
+  });
+};
 enn.rcrs=(nest,...some)=>{
   enn.scan(some,(idx,val,end)=>{
     nest(val,end);
@@ -157,30 +201,6 @@ enn.rcrs=(nest,...some)=>{
     );
   }};
 };
-/*enn.frct=(nest,one,...some)=>{
-  const f={
-    sttl:(hndl)=>{
-      if(some.length){
-        let fin=false;
-        let ret=undefined;
-        const end=(val)=>{
-          fin=true;
-          ret=val;
-          return val;
-        };
-        nest(one,end);
-        if(fin){
-          return ret;
-        }
-        enn.frct(nest,...some)
-        .sttl(hndl);
-        return;
-      }
-      hndl(one);
-    }
-  };
-  return f;
-};*/
 const rmap={};
 enn.scan([
   'loop','scan','flat'
@@ -228,37 +248,6 @@ enn.scan([
     return res;
   };
 });
-/*enn.scan([
-  'frct'
-],(idx,hname)=>{
-  rmap[hname]=(nest,one,...some)=>{
-    const f={};
-    f.sttl=(hndl,trim=false)=>{
-      const res=[];
-      let eval=(val)=>{
-        res.push(val);
-      };
-      if(trim){
-        eval=(val)=>{
-          if(val){
-            res.push(val);
-          }
-        };
-      }
-      enn[hname]((o,end)=>{
-        eval(
-          nest(o,end)
-        );
-      },one,...some).sttl((o)=>{
-        eval(
-          hndl(o)
-        );
-      });
-      return res;
-    };
-    return f;
-  };
-});*/
 enn.rmap=rmap;
 enn.land=(name,rsrc)=>{
   const lnd={};
@@ -363,6 +352,18 @@ enn.regex=(txt,f='g')=>{
     },
   };
 };
+enn.test=(val,hndl,hndl2)=>{
+  if(val)
+    hndl();
+  else
+    hndl2();
+};
+enn.eval=(hndl,hndl1,hndl2)=>{
+  if(hndl())
+    hndl1();
+  else
+    hndl2();
+};
 enn.type=(tgt,tname='obj',hndl)=>{
   if(hndl){
     return enn.type(
@@ -430,33 +431,14 @@ enn.type=(tgt,tname='obj',hndl)=>{
   }
   return typeof tgt===tname;
 };
-enn.vlid=(hndl)=>{
-  const ary=[];
-  const v={
-    typ:(tname)=>{
-      ary.push((tgt)=>{
-        return enn.type(tgt,tname);
-      });
-      return v;
-    },
-    add:(hndl)=>{
-      ary.push(hndl);
-      return v;
-    },
-    end:()=>{
-      return (tgt)=>{
-        let t=true;
-        enn.scan(ary,(idx,hndl,end)=>{
-          t=hndl(tgt) || end(false);
-        });
-        return t;
-      };
-    },
+enn.vlid=(...hd)=>{
+  return (val)=>{
+    let ret=undefined;
+    enn.scan(hd,(idx,hndl,end)=>{
+      ret=hndl(val)||end(undefined);
+    });
+    return ret;
   };
-  if(hndl){
-    v.add(hndl)
-  }
-  return v;
 };
 enn.flag=(flg={})=>{
   const hup={};
@@ -563,21 +545,21 @@ enn.flag=(flg={})=>{
 enn.stat=(name,obj={})=>{
   let cur=obj;
   let edt=obj;
-  const als=enn.alias();
+  //const als=enn.alias();
   const stt={};
   const s={
-    als:(name,lname)=>{
+    /*als:(name,lname)=>{
       als.add(name,lname);
       return s;
-    },
+    },*/
     add:(name,obj)=>{
-      name=als.see(name);
+      //name=als.see(name);
       stt[name]=obj;
       edt=stt[name];
       return s;
     },
     arw:(name)=>{
-      name=als.see(name);
+      //name=als.see(name);
       cur=stt[name]||cur;
       return s;
     },
@@ -771,11 +753,27 @@ enn.cach=(cac={})=>{
   def.ini=def.def
   let csr=null;
   const hd={};
+  const upd=enn.stat('done',{
+    done:(hndl)=>{
+      upd.arw('none');
+      hndl(c);
+    },
+  }).add('gone',{
+    gone:(hndl)=>{
+      upd.arw('none');
+      hndl(c);
+    },
+  }).add('none',{}); 
   const set={};
-  set.set=(k,v)=>{
+  set.def=(k,v)=>{
     cac[k]=v;
     return c;
   };
+  set.upd=(k,v)=>{
+    upd.arw('done');
+    return set.def(k,v);
+  };
+  set.set=set.def;
   let pub=false;
   set.pub=(k,v)=>{
     set.set(k,v);
@@ -794,6 +792,22 @@ enn.cach=(cac={})=>{
   };
   const c={
     type:'enn',
+    prob:(hndl)=>{
+      upd.arw('gone');
+      set.set=set.upd;
+      hndl(c);
+      set.set=set.def;
+      upd.arw('none');
+      return c;
+    },
+    done:(hndl)=>{
+      upd.act('done',hndl);
+      return c;
+    },
+    gone:(hndl)=>{
+      upd.act('gone',hndl);
+      return c;
+    },
     pub:(yes=true)=>{
       if(yes){
         c.set=set.pub;
@@ -867,29 +881,6 @@ enn.cach=(cac={})=>{
           .pub(pub);
       });
     },
-    /*nest:(name)=>{
-      return c.eval(name,()=>{
-        return enn.cach()
-          .def(def.val)
-          .pub(pub);
-      });
-    },
-    nest:(name)=>{
-      return c.get(name)||c.bet(
-        name,()=>{
-          return enn.cach()
-            .def(def.val)
-            .pub(pub)
-      }).get(name);
-    },
-    nest:(name)=>{
-      return c.get(name)||c.set(
-        name,
-        enn.cach()
-          .def(def.val)
-          .pub(pub)
-      ).get(name);
-    },*/
     eval:(name,hndl, ...arg)=>{
       return c.get(name)||c.bet(
         name,hndl,...arg
@@ -1081,6 +1072,10 @@ enn.tree=(root)=>{
   root=root||enn.cach();
   const t={
     type:'enn',
+    prob:(...arg)=>{
+      root.prob(...arg);
+      return t;
+    },
     def:(...arg)=>{
       root.def(...arg);
       return t;
@@ -1260,102 +1255,6 @@ enn.tree=(root)=>{
     },
   };
   return t;
-};
-
-enn.schm=(name,hndl)=>{
-  const inst=enn.tree()
-    .def(undefined);
-  const sch=enn.cach()
-    .def(undefined);
-  const all={};  
-
-  all.schm=(name,hndl)=>{
-    schm=sch.eval(name,()=>{
-      return hndl;
-    });
-    return all;
-  };
-
-  /*const sc=enn.tree()
-    .def(undefined);*/
-  all.scop=(...sco)=>{
-    const sub=inst.scop(...sco);
-    /*const sub=sc.eval(()=>{
-      return inst.scop(...sco);
-    },...sco);*/
-    let done=false;
-    const s={};
-    s.done=(hndl)=>{
-      if(done)
-        hndl(s)
-      return s;
-    };
-    s.gone=(hndl)=>{
-      if(!done)
-        hndl(s);
-      return s;
-    };
-
-    let schm=null;
-    s.schm=(name,hndl)=>{
-      done=false;
-      schm=sch.eval(name,()=>{
-        return hndl;
-      });
-      if(schm)
-        done=true;
-      return s;
-    };
-    s.schm(name,hndl);
-
-    const cast=(...arg)=>{
-      return enn.cach(
-        schm(...arg)
-      ).def(undefined)
-      .pub(true);
-    };
-    s.add=(name,...arg)=>{
-      done=false;
-      sub.eval1(()=>{
-        done=true;
-        return cast(name,...arg);
-      },name);
-      return s;
-    };
-    s.mod=(name,...arg)=>{
-      done=false;
-      sub.bet1(()=>{
-        done=true;
-        return cast(name,...arg);
-      },name);
-      return s; 
-    };
-    s.del=(name)=>{
-      done=false;
-      enn.type(sub.del(name)
-        .get(name),'u',(val)=>{
-        done=true;
-      });
-      return s;
-    };
-    s.see=(name,hndl)=>{
-      done=false;
-      const val=sub.get(name);
-      if(enn.type(val,'u')){
-        return s
-      }
-      done=true;
-      if(hndl){
-        hndl(val);
-        return s;
-      }
-      return val;
-    };
-
-    return s;
-  };
-
-  return all;
 };
 
 const pal={
@@ -1952,10 +1851,6 @@ enn.tmpl.text=(...arg)=>{
   return tmpl(
     enn.text, ...arg
   );
-};
-
-enn.pose=(mname)=>{
-
 };
 
 enn.rand=(mult=17)=>{

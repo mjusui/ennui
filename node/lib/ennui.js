@@ -2,6 +2,7 @@
 const http=require('http');
 const https=require('https');
 */
+const crypto=require('crypto');
 const url=require('url');
 const qs=require('querystring');
 const fs=require('fs');
@@ -126,7 +127,7 @@ enn.http.resp=(cmmn=(res)=>{})=>{
       ).push(hndl);
       return r;
     },
-    fix:()=>{
+    end:()=>{
       return resp;
     },
   };
@@ -135,8 +136,7 @@ enn.http.resp=(cmmn=(res)=>{})=>{
     200,201,202,203,204,205,206,207,208,226,
     300,301,302,303,304,305,306,307,308,
     400,401,402,403,404,405,406,407,408,409,410,
-    411,412,413,414,415,416,417,418,421,422,423,424,426,
-    451,
+    411,412,413,414,415,416,417,418,421,422,423,424,426,451,
     500,501,502,503,504,505,506,507,508,509,510
   ],(idx,code)=>{
     r.tmpl(code,(res)=>{
@@ -324,6 +324,16 @@ enn.clust=(name='cpu',opt={})=>{
     },
   };
   return c;
+};
+
+enn.hash=(val,hndl)=>{
+  const hash=crypto.createHash('sha512');
+  hash.on('readable',()=>{
+    hndl(hash.read()
+      .toString('hex'));
+  });
+  hash.write(val);
+  hash.end();
 };
 
 module.exports=enn;
