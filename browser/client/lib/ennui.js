@@ -78,21 +78,28 @@ enn.whic=(w=true,a=null,b=null)=>{
   }
   return b;
 };
+enn.tokn=(hndl,t=1)=>{
+  return (...arg)=>{
+    if(t-- < 1)
+      return;
+    return hndl(...arg);
+  };
+};
 enn.loop=(len,hndl,hed=0,tal=0)=>{
   len=len-tal
   let cnt=0+hed;
   let res=undefined;
-  const end=(r)=>{
+  const end=enn.tokn((r)=>{
     cnt=len;
     res=r;
     return res;
-  };
+  });
   while(cnt < len){
     hndl(cnt++,end);
   }
   return res;
 };
-enn.scan=(ary,hndl,hed=0,tal=0)=>{
+enn.scan=(ary,hndl,hed,tal)=>{
   return enn.loop(ary.length,(cnt,end)=>{
     hndl(cnt,ary[cnt],end);
   },hed,tal);
@@ -129,10 +136,10 @@ enn.flat=(some,hndl)=>{
   let cnt=0
   let fin=false;
   let ret=undefined;
-  const end=(r)=>{
+  const end=enn.tokn((r)=>{
     fin=true;
     ret=r;
-  };
+  });
   let res=undefined;
   const nest=(some,hndl)=>{
     enn.type(some,'a',()=>{
@@ -155,31 +162,31 @@ enn.flat=(some,hndl)=>{
   return ret;
 };
 enn.seri={};
-enn.seri.loop=(len,hndl,hed=0,tel=0)=>{
-  len=len - tel;
+enn.seri.loop=(len,hndl,hed=0,tal=0)=>{
+  len=len - tal;
   let cnt=0 + hed;
   let res=undefined;
-  const end=(r)=>{
+  const end=enn.tokn((r)=>{
     cnt=len;
     res=r;
     return res;
-  };
+  });
   let ready=(res)=>{};
-  const next=()=>{
+  const next=(val)=>{
     if(cnt < len){
-      hndl(cnt++,next,end);
+      hndl(cnt++,enn.tokn(next),end);
       return;
     }
     ready(res);
   };
   return {
-    ready:(hndl)=>{
+    ready:enn.tokn((hndl)=>{
       ready=hndl||ready;
       next();
-    },
+    }),
   };
 };
-enn.seri.scan=(ary,hndl,hed=0,tal=0)=>{
+enn.seri.scan=(ary,hndl,hed,tal)=>{
   return enn.seri.loop(ary.length,(cnt,next,end)=>{
     hndl(cnt,ary[cnt],next,end);
   },hed,tal);
@@ -190,6 +197,154 @@ enn.seri.itrt=(obj,hndl)=>{
   (idx,name,next,end)=>{
     hndl(name,obj[name],next,end);
   });
+};
+enn.seri.rmap={};
+enn.seri.rmap.loop=(len,hndl,trim=false)=>{
+  const res=[];
+  let eval=(val)=>{
+    res.push(val);
+  };
+  if(trim){
+    eval=(val)=>{
+      if(val)
+        res.push(val);
+    };
+  }
+  const seri=enn.seri.loop(len,(cnt,next,end)=>{
+    hndl(cnt,enn.tokn((val)=>{
+      eval(val);
+      next();
+    }),end);
+  });
+  return { ready:enn.tokn((hndl)=>{
+    seri.ready((val)=>{
+      hndl(res);
+    });
+  }), };
+};
+enn.seri.rmap.scan=(ary,hndl,trim)=>{
+  return enn.seri.rmap.loop(ary.length,(cnt,next,end)=>{
+    hndl(cnt,ary[cnt],next,end);
+  },trim);
+};
+enn.seri.rmap.itrt=(obj,hndl,trim=false)=>{
+  const res={};
+  let eval=(name,val)=>{
+    res[name]=val;
+  };
+  if(trim){
+    eval=(name,val)=>{
+      if(val)
+        res[name]=val;
+    };
+  }
+  const scan=enn.seri.itrt(
+    obj,
+  (name,val,next,end)=>{
+    hndl(name,val,enn.tokn((val)=>{
+      eval(name,val);
+      next();
+    }),end);
+  });
+  return { ready:enn.tokn((hndl)=>{
+    scan.ready((val)=>{
+      hndl(res);
+    });
+  }), };
+};
+enn.para={};
+enn.para.loop=(len,hndl,hed=0,tal=0)=>{
+
+  let ret=undefined;
+  const cmmt=enn.tokn((val)=>{
+    ret=val;
+  });
+
+  let tok=len;
+  let ready=(val)=>{};
+  const cnsm=()=>{
+    if(--tok)
+      return;
+    ready(ret);
+  };
+
+  const loop=()=>{
+    enn.loop(len,(cnt,end)=>{
+      hndl(cnt,enn.tokn(cnsm),(val)=>{
+        cmmt(val);
+        return end(val);
+      });
+    });
+  };
+
+  return { ready:(hndl)=>{
+    ready=hndl;
+    loop();
+  }, };
+};
+enn.para.scan=(ary,hndl,hed,tal)=>{
+  return enn.para.loop(ary.length,(cnt,cnsm,end)=>{
+    hndl(cnt,ary[cnt],cnsm,end);
+  },hed,tal);
+};
+enn.para.itrt=(obj,hndl)=>{
+  return enn.para.scan(
+    Object.keys(obj),
+  (idx,key,cnsm,end)=>{
+    hndl(key,obj[key],cnsm,end);
+  });
+};
+enn.para.rmap={};
+enn.para.rmap.loop=(len,hndl,trim=false)=>{
+  const res=[];
+  let eval=(val)=>{
+    res.push(val);
+  };
+  if(trim){
+    eval=(val)=>{
+      if(val)
+        res.push(val);
+    };
+  }
+  const para=enn.para.loop(len,(cnt,cnsm,end)=>{
+    hndl(cnt,enn.tokn((val)=>{
+      eval(val);
+      cnsm();
+    }),end);
+  });
+  return { ready:(hndl)=>{
+    para.ready((val)=>{
+      hndl(res);
+    });
+  }, };
+};
+enn.para.rmap.scan=(ary,hndl,trim)=>{
+  return enn.para.rmap.loop(ary.length,(cnt,cnsm,end)=>{
+    hndl(cnt,ary[cnt],cnsm,end);
+  },trim);
+};
+enn.para.rmap.itrt=(obj,hndl,trim=false)=>{
+  const res={};
+  let eval=(name,val)=>{
+    res[name]=val;
+  };
+  if(trim){
+    eval=(name,val)=>{
+      if(val)
+        res[name]=val;
+    };
+  }
+  const para=enn.para.itrt(obj,(name,val,cnsm,end)=>{
+    hndl(name,val,enn.tokn((val)=>{
+      eval(name,val);
+      cnsm();
+    }),end);
+  });
+  return { ready:(hndl)=>{
+    para.ready((val)=>{
+      hndl(res);
+    });
+  }, };
 };
 enn.rcrs=(nest,...some)=>{
   enn.scan(some,(idx,val,end)=>{
