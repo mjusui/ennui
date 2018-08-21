@@ -283,15 +283,15 @@ enn.para.loop=(len,hndl,hed=0,tal=0)=>{
   }, };
 };
 enn.para.scan=(ary,hndl,hed,tal)=>{
-  return enn.para.loop(ary.length,(cnt,cnsm,end)=>{
-    hndl(cnt,ary[cnt],cnsm,end);
+  return enn.para.loop(ary.length,(cnt,cnsm,cmmt)=>{
+    hndl(cnt,ary[cnt],cnsm,cmmt);
   },hed,tal);
 };
 enn.para.itrt=(obj,hndl)=>{
   return enn.para.scan(
     Object.keys(obj),
-  (idx,key,cnsm,end)=>{
-    hndl(key,obj[key],cnsm,end);
+  (idx,key,cnsm,cmmt)=>{
+    hndl(key,obj[key],cnsm,cmmt);
   });
 };
 enn.para.rmap={};
@@ -306,11 +306,11 @@ enn.para.rmap.loop=(len,hndl,trim=false)=>{
         res.push(val);
     };
   }
-  const para=enn.para.loop(len,(cnt,cnsm,end)=>{
+  const para=enn.para.loop(len,(cnt,cnsm,cmmt)=>{
     hndl(cnt,enn.tokn((val)=>{
       eval(val);
       cnsm();
-    }),end);
+    }),cmmt);
   });
   return { ready:(hndl)=>{
     para.ready((val)=>{
@@ -319,8 +319,8 @@ enn.para.rmap.loop=(len,hndl,trim=false)=>{
   }, };
 };
 enn.para.rmap.scan=(ary,hndl,trim)=>{
-  return enn.para.rmap.loop(ary.length,(cnt,cnsm,end)=>{
-    hndl(cnt,ary[cnt],cnsm,end);
+  return enn.para.rmap.loop(ary.length,(cnt,cnsm,cmmt)=>{
+    hndl(cnt,ary[cnt],cnsm,cmmt);
   },trim);
 };
 enn.para.rmap.itrt=(obj,hndl,trim=false)=>{
@@ -334,11 +334,11 @@ enn.para.rmap.itrt=(obj,hndl,trim=false)=>{
         res[name]=val;
     };
   }
-  const para=enn.para.itrt(obj,(name,val,cnsm,end)=>{
+  const para=enn.para.itrt(obj,(name,val,cnsm,cmmt)=>{
     hndl(name,val,enn.tokn((val)=>{
       eval(name,val);
       cnsm();
-    }),end);
+    }),cmmt);
   });
   return { ready:(hndl)=>{
     para.ready((val)=>{

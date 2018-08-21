@@ -3,12 +3,12 @@ const exec=require('child_process').exec;
 
 enn.para.rmap.scan([
   'a','b','c'
-],(idx,val,cnsm,end)=>{
+],(idx,val,cnsm,cmmt)=>{
   exec(`echo ${idx} ${val}`,(err,stdout,stderr)=>{
     console.log(
       `1. ${stdout}`.replace(/\n$/,''));
     if(0 < idx)
-      console.log(`4. ${end(val)}`);
+      console.log(`4. ${cmmt(val)}`);
     cnsm(val);
   });
 }).ready((val)=>{
