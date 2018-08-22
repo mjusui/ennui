@@ -278,7 +278,7 @@ enn.para.loop=(len,hndl,hed=0,tal=0)=>{
   };
 
   return { ready:(hndl)=>{
-    ready=hndl;
+    ready=hndl||ready;
     loop();
   }, };
 };
