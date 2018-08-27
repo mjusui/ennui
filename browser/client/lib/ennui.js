@@ -172,7 +172,7 @@ enn.seri.loop=(len,hndl,hed=0,tal=0)=>{
     return res;
   });
   let ready=(res)=>{};
-  const next=(val)=>{
+  const next=()=>{
     if(cnt < len){
       hndl(cnt++,enn.tokn(next),end);
       return;
@@ -252,6 +252,67 @@ enn.seri.rmap.itrt=(obj,hndl,trim=false)=>{
     });
   }), };
 };
+enn.seri.rlay=(hndl)=>{
+  const r={};
+  const hd=[];
+
+  r.rlay=(hndl)=>{
+    hd.push(hndl);
+    return r;
+  };
+  r.rlay(hndl);
+
+  let ready=(val)=>{};
+  const go=()=>{
+    let nxt=null;
+    enn.seri.scan(hd,(idx,hndl,next,end)=>{
+      hndl(enn.tokn((val)=>{
+        nxt=val;
+        next();
+        return nxt;
+      }),end,nxt);
+    }).ready(ready);
+  };
+
+  r.ready=enn.tokn((hndl)=>{
+    ready=hndl||ready;
+    go();
+    return r;
+  });
+
+  return r;
+};
+enn.seri.rmap.rlay=(hndl)=>{
+  const r={};
+  const hd=[];
+
+  r.rlay=(hndl)=>{
+    hd.push(hndl);
+    return r;
+  };
+  r.rlay(hndl);
+
+  let ready=(val)=>{};
+  const go=()=>{
+    let nxt=null;
+    enn.seri.rmap.scan(hd,(idx,hndl,next,end)=>{
+      hndl(enn.tokn((val)=>{
+        nxt=val;
+        next(val);
+        return nxt;
+      }),end,nxt);
+    }).ready(ready);
+  };
+
+  r.ready=enn.tokn((hndl)=>{
+    ready=hndl||ready;
+    go();
+    return r;
+  });
+
+  return r;
+};
+
 enn.para={};
 enn.para.loop=(len,hndl,hed=0,tal=0)=>{
 
