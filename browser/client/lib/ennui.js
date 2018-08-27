@@ -252,60 +252,76 @@ enn.seri.rmap.itrt=(obj,hndl,trim=false)=>{
     });
   }), };
 };
-enn.seri.rlay=(hndl)=>{
+enn.seri.rlay=(name,hndl)=>{
   const r={};
   const hd=[];
 
-  r.rlay=(hndl)=>{
-    hd.push(hndl);
+  let cnt=0;
+  r.rlay=(name,hndl)=>{
+    hd.push({
+      name:name||cnt++,
+      hndl:hndl,
+    });
     return r;
   };
-  r.rlay(hndl);
+  r.rlay(name,hndl);
 
-  let ready=(val)=>{};
+  let ready=undefined;
   const go=()=>{
-    let nxt=null;
-    enn.seri.scan(hd,(idx,hndl,next,end)=>{
-      hndl(enn.tokn((val)=>{
-        nxt=val;
+    const rec=enn.cach()
+      .def(undefined);
+    enn.seri.scan(hd,(idx,hd,next,end)=>{
+      hd.hndl(rec.see, enn.tokn((val)=>{
+        rec.val(
+          hd.name, val);
         next();
-        return nxt;
-      }),end,nxt);
-    }).ready(ready);
+        return val;
+      }),end);
+    }).ready((val)=>{
+      ready(rec.see,val);
+    });
   };
 
   r.ready=enn.tokn((hndl)=>{
-    ready=hndl||ready;
+    ready=hndl;
     go();
     return r;
   });
 
   return r;
 };
-enn.seri.rmap.rlay=(hndl)=>{
+enn.seri.rmap.rlay=(name,hndl)=>{
   const r={};
   const hd=[];
 
-  r.rlay=(hndl)=>{
-    hd.push(hndl);
+  let cnt=0;
+  r.rlay=(name,hndl)=>{
+    hd.push({
+      name:name||cnt++,
+      hndl:hndl
+    });
     return r;
   };
-  r.rlay(hndl);
+  r.rlay(name,hndl);
 
-  let ready=(val)=>{};
+  let ready=undefined;
   const go=()=>{
-    let nxt=null;
-    enn.seri.rmap.scan(hd,(idx,hndl,next,end)=>{
-      hndl(enn.tokn((val)=>{
-        nxt=val;
+    const rec=enn.cach()
+      .def(undefined);
+    enn.seri.rmap.scan(hd,(idx,hd,next,end)=>{
+      hd.hndl(rec.see, enn.tokn((val)=>{
+        rec.val(
+          hd.name, val);
         next(val);
-        return nxt;
-      }),end,nxt);
-    }).ready(ready);
+        return val;
+      }),end);
+    }).ready((val)=>{
+      ready(rec.see,val);
+    });
   };
 
   r.ready=enn.tokn((hndl)=>{
-    ready=hndl||ready;
+    ready=hndl;
     go();
     return r;
   });
@@ -1121,8 +1137,19 @@ enn.cach=(cac={})=>{
     get:(k)=>{
       return cac[k]||def.ini(k);
     },
+    see:(k,hndl)=>{
+      if(hndl){
+        hndl(c.get(k));
+        return c;
+      }
+      return c.get(k);
+    },
     del:(k)=>{
       c.set(k,undefined);
+      return c;
+    },
+    ref:(hndl)=>{
+      hndl(c);
       return c;
     },
     rmap:(hndl,trim=false)=>{
