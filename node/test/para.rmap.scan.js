@@ -7,9 +7,9 @@ enn.para.rmap.scan([
   exec(`echo ${idx} ${val}`,(err,stdout,stderr)=>{
     console.log(
       `1. ${stdout}`.replace(/\n$/,''));
-    if(0 < idx)
-      console.log(`4. ${cmmt(val)}`);
     cnsm(val);
+    if(idx < 2)
+      console.log(`4. ${cmmt(val)}`);
   });
 }).ready((val)=>{
   console.log(`2. ${val}`);

@@ -7,7 +7,7 @@ enn.para.scan([
   exec(`echo ${idx} ${val}`,(err,stdout,stderr)=>{
     console.log(
       `1. ${stdout}`.replace(/\n$/,''));
-    if(0 < idx)
+    if(idx < 2)
       console.log(`4. ${cmmt(val)}`);
     cnsm();
   });
