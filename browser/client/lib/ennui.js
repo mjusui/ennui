@@ -252,19 +252,19 @@ enn.seri.rmap.itrt=(obj,hndl,trim=false)=>{
     });
   }), };
 };
-enn.seri.rlay=(name,hndl)=>{
+enn.seri.rlay=(hndl,name)=>{
   const r={};
   const hd=[];
 
   let cnt=0;
-  r.rlay=(name,hndl)=>{
+  r.rlay=(hndl,name)=>{
     hd.push({
       name:name||cnt++,
       hndl:hndl,
     });
     return r;
   };
-  r.rlay(name,hndl);
+  r.rlay(hndl,name);
 
   let ready=(r,v)=>{};
   const go=()=>{
@@ -290,19 +290,19 @@ enn.seri.rlay=(name,hndl)=>{
 
   return r;
 };
-enn.seri.rmap.rlay=(name,hndl)=>{
+enn.seri.rmap.rlay=(hndl,name)=>{
   const r={};
   const hd=[];
 
   let cnt=0;
-  r.rlay=(name,hndl)=>{
+  r.rlay=(hndl,name)=>{
     hd.push({
       name:name||cnt++,
       hndl:hndl
     });
     return r;
   };
-  r.rlay(name,hndl);
+  r.rlay(hndl,name);
 
   let ready=(r,v)=>{};
   const go=()=>{
@@ -426,18 +426,19 @@ enn.para.rmap.itrt=(obj,hndl,trim=false)=>{
     });
   }, };
 };
-enn.para.race=(name,hndl)=>{
+enn.para.race=(hndl,name)=>{
   const r={};
   const hd=[];
 
-  r.race=(name,hndl)=>{
+  let cnt=0;
+  r.race=(hndl,name)=>{
     hd.push({
-      name:name,
+      name:name||cnt++,
       hndl:hndl,
     });
     return r;
   };
-  r.race(name,hndl);
+  r.race(hndl,name);
 
   let ready=(r,v)=>{}; 
   const go=()=>{
@@ -463,18 +464,19 @@ enn.para.race=(name,hndl)=>{
 
   return r;
 };
-enn.para.rmap.race=(name,hndl)=>{
+enn.para.rmap.race=(hndl,name)=>{
   const r={};
   const hd=[];
 
-  r.race=(name,hndl)=>{
+  let cnt=0;
+  r.race=(hndl,name)=>{
     hd.push({
-      name:name,
+      name:name||cnt++,
       hndl:hndl,
     });
     return r;
   };
-  r.race(name,hndl);
+  r.race(hndl,name);
 
   let ready=(r,v)=>{}; 
   const go=()=>{
@@ -1102,6 +1104,13 @@ enn.cach=(cac={})=>{
   };
   const c={
     type:'enn',
+    raw:(hndl)=>{
+      if(hndl){
+        hndl(cac);
+        return c;
+      }
+      return cac;
+    },
     prob:(hndl)=>{
       upd.arw('gone');
       set.set=set.upd;
