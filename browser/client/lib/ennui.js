@@ -78,6 +78,24 @@ enn.whic=(w=true,a=null,b=null)=>{
   }
   return b;
 };
+enn.lift=(name,val)=>{
+  const ret={};
+
+  const l={};
+  l.lift=(name,val)=>{
+    ret[name]=val;
+    return l;
+  };
+  l.lift(name,val);
+
+  l.end=(name,val)=>{
+    if(val)
+      l.lift(name,val);
+    return ret;
+  };
+
+  return l;
+};
 enn.tokn=(hndl,t=1)=>{
   return (...arg)=>{
     if(t-- < 1)
@@ -663,6 +681,30 @@ enn.regex=(txt,f='g')=>{
       return res;
     },
   };
+};
+enn.asrt=(hndl,exam=1)=>{
+  let good=0;
+  let chnc=0; 
+  let msg='';
+  const out=(stat)=>{
+    return `${stat} (pass=${good}/${exam}, chance=${good}/${chnc}): ${msg}`;
+  };
+  const test=(val)=>{
+    if(val)
+      good++;
+    chnc++;
+  };
+  const end=()=>{
+    if(good < exam){
+      console.error(out('Bad'));
+      return;
+    }
+    console.error(out('Good'));
+  };
+  const cmnt=(val)=>{
+    msg=val;
+  };
+  hndl(test,end,cmnt);
 };
 enn.test=(val,hndl,hndl2)=>{
   if(val)
