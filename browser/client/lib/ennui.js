@@ -685,21 +685,26 @@ enn.regex=(txt,f='g')=>{
 enn.asrt=(hndl,exam=1)=>{
   let good=0;
   let chnc=0; 
+  let err=[];
   let msg='';
   const out=(stat)=>{
-    return `${stat} (pass=${good}/${exam}, chance=${good}/${chnc}): ${msg}`;
+    return `${stat} (pass=${good}/${exam}, chance=${good}/${chnc}, errno="${err}"): ${msg}`;
   };
   const test=(val)=>{
-    if(val)
-      good++;
     chnc++;
+    if(val){
+      good++;
+      return true;
+    }
+    err.push(chnc);
+    return false;
   };
   const end=()=>{
     if(good < exam){
       console.error(out('Bad'));
       return;
     }
-    console.error(out('Good'));
+    console.log(out('Good'));
   };
   const cmnt=(val)=>{
     msg=val;
