@@ -1076,31 +1076,15 @@ enn.grop=(def=[])=>{
   };
   return g;
 };
-enn.clon=(obj={},literal=false)=>{
-  const cln=enn.rmap.itrt(obj,(name,val)=>{
-    return val;
-    if(literal){
-      /*
-        'true' -> true
-        '17' -> 17
-        'a,b,c' -> [a,b,c]
-        '{a:b,c:d}' -> {a:b,c:d}
-      */
-    }
-  });
-  const c={
-    mod:(name,val)=>{
-      cln[name]=val;
-      return c;
-    },
-    end:(name,val)=>{
-      if(val && name){
-        cln[name]=val;
-      }
-      return cln;
-    },
-  };
-  return c;
+enn.clon=(obj={})=>{
+  const cln=enn.cach(
+    enn.rmap.itrt(obj,(name,val)=>{
+      return val;
+    })
+  ).def(undefined);
+  cln.mod=cln.set;
+  cln.end=cln.raw;
+  return cln;
 
 };
 enn.cach=(cac={})=>{
@@ -1252,10 +1236,13 @@ enn.cach=(cac={})=>{
         name,hndl,...arg
       ).get(name);
     },
-    val:(name,val)=>{
+    fil:(name,val)=>{
       return c.get(name)||c.set(
-        name,val
-      ).get(name);
+        name,val);
+    },
+    val:(name,val)=>{
+      return c.fil(name,val)
+        .get(name);
     },
     bet:(k,h,...a)=>{
       return c.set(k,h(...a));
@@ -2337,7 +2324,8 @@ enn.http.prs=(opt={},ow={})=>{
   o.user=ow.user||ow.username||
     opt.user||opt.username||'';
   o.auth=o.pass && `:${o.pass}`;
-    o.auth=`${o.user}${o.pass}`;
+    o.auth=o.user && `${o.user}${o.auth}`;
+    o.auth=ow.auth||opt.auth||o.auth||undefined;
   o.agent=ow.agent||opt.agent;
   o.timeout=ow.timeout||ow.time||
     ow.millisecond||ow.milli||ow.ms||
@@ -2355,7 +2343,7 @@ enn.http.bld=(o,para)=>{
   let url=o.url;
   if(!url){
     url+=`${o.protocol}\/\/`;
-    url+=o.auth||'';
+    url+=o.auth && `${o.auth}@`||'';
     url+=o.hostname||'';
     if(o.port){
       url+=`:${o.port}`;
