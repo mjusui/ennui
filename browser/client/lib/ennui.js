@@ -1237,12 +1237,17 @@ enn.cach=(cac={})=>{
       ).get(name);
     },
     fil:(name,val)=>{
-      return c.get(name)||c.set(
-        name,val);
+      c.val(name,val);
+      return c;
     },
     val:(name,val)=>{
-      return c.fil(name,val)
-        .get(name);
+      return c.get(name)||c.set(
+        name,val
+      ).get(name);
+    },
+    sat:(k,h,...a)=>{
+      c.eval(k,h,...a);
+      return c;
     },
     bet:(k,h,...a)=>{
       return c.set(k,h(...a));
