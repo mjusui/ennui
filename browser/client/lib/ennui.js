@@ -1236,21 +1236,21 @@ enn.cach=(cac={})=>{
         name,hndl,...arg
       ).get(name);
     },
-    fil:(name,val)=>{
-      c.val(name,val);
-      return c;
-    },
     val:(name,val)=>{
       return c.get(name)||c.set(
         name,val
       ).get(name);
     },
     sat:(k,h,...a)=>{
-      c.eval(k,h,...a);
+      c.get(k)||c.bet(k,h,...a);
       return c;
     },
     bet:(k,h,...a)=>{
       return c.set(k,h(...a));
+    },
+    fil:(name,val)=>{
+      c.get(name)||c.set(name,val);
+      return c;
     },
     set:set.set,
     sub:(hndl, ...key)=>{
