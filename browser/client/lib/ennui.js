@@ -1108,7 +1108,9 @@ enn.cach=(cac={})=>{
       return cac;
     },
     lim:(...k)=>{
-      lim=k;
+      if(!lim.length){
+        lim=k;
+      }
       return c;
     },
     rich:(yes=true)=>{
@@ -1436,18 +1438,26 @@ enn.tree=(root)=>{
   root=root||enn.cach();
   const t={
     type:'enn',
-    prob:(...arg)=>{
-      root.prob(...arg);
+    lim:(...arg)=>{
+      root.lim(...arg);
       return t;
     },
+    rich:(...arg)=>{
+      root.rich(...arg);
+      return t;
+    },
+    /*prob:(...arg)=>{
+      root.prob(...arg);
+      return t;
+    },*/
     def:(...arg)=>{
       root.def(...arg);
       return t;
     },
-    pub:(...arg)=>{
+    /*pub:(...arg)=>{
       root.pub(...arg);
       return t;
-    },
+    },*/
     lab:(...arg)=>{
       root.lab(...arg);
       return t;
