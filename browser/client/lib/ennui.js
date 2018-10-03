@@ -1110,6 +1110,11 @@ enn.cach=(cac={})=>{
     lim:(...k)=>{
       if(!lim.length){
         lim=k;
+        const one={};
+        enn.scan(k,(idx,key)=>{
+          one[key]=cac[key];
+        });
+        cac=one;
       }
       return c;
     },
@@ -1629,6 +1634,36 @@ enn.tree=(root)=>{
     },
   };
   return t;
+};
+enn.schm=(path,...key)=>{
+  const schm=enn.cach()
+    .def(undefined)
+  const conf=enn.lift('schm',(path,...key)=>{
+    schm.fil(path,key);
+    return conf;
+  }).end('end',()=>{
+    return auth;
+  });
+  conf.schm(path,...key);
+
+  const inst=enn.cach()
+    .def(undefined)
+    .rich(true);
+  const auth=enn.lift('auth',(name)=>{
+    const scop=inst.nest(name);
+
+    const fact=enn.lift('path',(path,hndl)=>{
+      hndl(scop.nest(path),(opt)=>{
+        return enn.cach(opt)
+          .def(undefined)
+          .rich(true)
+          .lim(...schm.get(path));
+      });
+      return fact;
+    }).end();
+    return fact;
+  });
+  return conf;
 };
 
 const pal={
