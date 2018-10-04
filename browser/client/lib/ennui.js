@@ -1254,8 +1254,18 @@ enn.cach=(cac={})=>{
       });
       return c;
     },
-    get:(k)=>{
-      return cac[k]||def.ini(k);
+    tak:(k,hndl,hndl2)=>{
+      const val=c.get(k);
+      if(val){
+        (hndl||(
+          (val)=>{}
+        ))(val);
+      }else{
+        (hndl2||(
+          (val)=>{}
+        ))(val)
+      }
+      return c;
     },
     see:(k,hndl)=>{
       if(hndl){
@@ -1263,6 +1273,9 @@ enn.cach=(cac={})=>{
         return c;
       }
       return c.get(k);
+    },
+    get:(k)=>{
+      return cac[k]||def.ini(k);
     },
     del:(k)=>{
       c.set(k,undefined);
