@@ -77,7 +77,43 @@ enn.http.req=(method,opt,hndl)=>{
   }
   req.end();
 };
-enn.http.resp=(cmmn=(res)=>{})=>{
+enn.http.resp=(header={})=>{
+  return (res,opt)=>{
+    /*res.statusCode=opt.stat||opt.status||opt.sc
+      ||opt.statusCode||opt.statuscode||404;
+    res.statusMessage=opt.msg||opt.message||opt.sm
+      ||opt.statusMessage;
+
+    enn.itrt(enn.clon(head)
+      .mix(opt.head||opt.header||opt.headers),
+    .end(),(name,val)=>{
+      res.setHeader(name,val);
+    });
+    
+    res.end(opt.body||opt.data);*/
+    const stat=enn.lift('stat',(sc,msg)=>{
+      res.statusCode=sc;
+      res.statusMessage=msg;
+      return head;
+    }).end();
+
+    const head=enn.lift('head',(head)=>{
+      enn.itrt(enn.clon(header)
+        .mix(head)
+      .end(),(key,val)=>{
+        res.setHeader(key,val);
+      });
+      return body;
+    }).end();
+
+    const body=enn.lift('body',(body)=>{
+      res.end(body);
+    }).end();
+
+    return stat;
+  };
+};
+/*enn.http.resp=(cmmn=(res)=>{})=>{
   const sc=enn.cach()
     .def(undefined);
   const resp=(res)=>{
@@ -144,7 +180,7 @@ enn.http.resp=(cmmn=(res)=>{})=>{
     });
   });
   return r;
-};
+};*/
 enn.http.serv=(
   cmmn=(req,res,end)=>{},opt={}
 )=>{

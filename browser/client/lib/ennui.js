@@ -1136,14 +1136,6 @@ enn.cach=(cac={})=>{
       rich=yes;
       return c;
     },
-    /*prob:(hndl)=>{
-      upd.arw('gone');
-      set.set=set.upd;
-      hndl(c);
-      set.set=set.def;
-      upd.arw('none');
-      return c;
-    },*/
     done:(hndl)=>{
       upd.act('done',hndl);
       return c;
@@ -1152,15 +1144,6 @@ enn.cach=(cac={})=>{
       upd.act('gone',hndl);
       return c;
     },
-    /*pub:(yes=true)=>{
-      if(yes){
-        c.set=set.pub;
-      }else{
-        c.set=set.set;
-      }
-      pub=yes;
-      return c;
-    },*/
     lab:(l,hndl)=>{
       return enn.scan(enn.splt(
         lab[l]
@@ -1241,6 +1224,14 @@ enn.cach=(cac={})=>{
     },
     bet:(k,h,...a)=>{
       return c.set(k,h(...a));
+    },
+    mix:(opt={},ow=true)=>{
+      let merge=c.fil;
+      if(ow){
+        merge=c.set;
+      }
+      enn.itrt(opt,merge);
+      return c;
     },
     fil:(name,val)=>{
       c.get(name)||c.set(name,val);
@@ -1655,27 +1646,30 @@ enn.schm=(path,...key)=>{
     schm.fil(path,key);
     return conf;
   }).end('end',()=>{
-    return auth;
+    return base;
   });
   conf.schm(path,...key);
 
   const inst=enn.cach()
     .def(undefined)
     .rich(true);
-  const auth=enn.lift('auth',(name)=>{
+  const base=enn.lift('base',(name)=>{
     const scop=inst.nest(name);
 
     const fact=enn.lift('path',(path,hndl)=>{
-      hndl(scop.nest(path),(opt)=>{
-        return enn.cach(opt)
-          .def(undefined)
-          .rich(true)
-          .lim(...schm.get(path));
+      schm.tak(path,(key)=>{
+        hndl(scop.nest(path),(opt)=>{
+          return enn.cach(opt)
+            .def(undefined)
+            .rich(true)
+            .lim(...key);
+        });
       });
       return fact;
     }).end();
+
     return fact;
-  });
+  }).end();
   return conf;
 };
 
