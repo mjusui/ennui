@@ -1051,15 +1051,15 @@ enn.cach=(cac={})=>{
   };
   let rich=false;
   set.rich=(k,v)=>{
-     set.lim(k,()=>{
-       const pv=c.get(k);
+    set.lim(k,()=>{
+      const pv=c.get(k);
 
-       set.def(k,v);
+      set.def(k,v);
 
-       upd.arw('done');
-       set.pub(k,v,pv);
-     });
-     return c;
+      upd.arw('done');
+      set.pub(k,v,pv);
+    });
+    return c;
   };
   set.set=set.def;
   let lim=[];

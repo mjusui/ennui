@@ -108,7 +108,17 @@ enn.http.resp=(header={})=>{
 
     const body=enn.lift('body',(body)=>{
       res.end(body);
-    }).end();
+    }).end('json',(json={},stat=true)=>{
+      let data=json;
+      if(stat){
+        data={
+          stat:`${res.statusCode}`,
+          msg:`${res.statusMessage}`,
+          data:data,
+        };
+      }
+      res.end(enn.str(data));
+    });
 
     return stat;
   };

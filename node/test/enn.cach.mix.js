@@ -18,7 +18,7 @@ enn.asrt((test,end,cmnt)=>{
     a:'s',
   }).mix({
     c:'t',
-  },false)
+  },false);
 
   const opt=mix.raw();
   test(opt.a==='s'
