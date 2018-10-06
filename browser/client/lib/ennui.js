@@ -1075,6 +1075,11 @@ enn.cach=(cac={})=>{
   };
   const upd={};
   upd.stt={};
+  upd.rst=()=>{
+    enn.itrt(upd.stt,(name,stt)=>{
+      stt.arw('none');
+    });
+  };
   upd.prob=(key)=>{
     upd.stt[key]=upd.stt[key]||(()=>{
       const stt=enn.stat('done',{
@@ -1143,6 +1148,7 @@ enn.cach=(cac={})=>{
         enn.itrt(mod,(name,hndl)=>{
           c[name]=hndl;
         });
+        upd.rst();
       }
       rich=yes;
       return c;
