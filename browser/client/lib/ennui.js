@@ -1056,7 +1056,8 @@ enn.cach=(cac={})=>{
 
       set.def(k,v);
 
-      upd.arw('done');
+      upd.prob(k)
+        .arw('done');
       set.pub(k,v,pv);
     });
     return c;
@@ -1072,17 +1073,27 @@ enn.cach=(cac={})=>{
       k==name && end(true)
     }) && hndl();
   };
-  const upd=enn.stat('done',{
-    done:(hndl)=>{
-      upd.arw('none');
-      hndl(c);
-    },
-  }).add('gone',{
-    gone:(hndl)=>{
-      upd.arw('none');
-      hndl(c);
-    },
-  }).add('none',{}); 
+  const upd={};
+  upd.stt={};
+  upd.prob=(key)=>{
+    upd.stt[key]=upd.stt[key]||(()=>{
+      const stt=enn.stat('done',{
+        done:(hndl)=>{
+          stt.arw('none');
+          hndl(c);
+        },
+      }).add('gone',{
+        gone:(hndl)=>{
+          stt.arw('none');
+          hndl(c);
+        },
+      }).add('none',{})
+      .arw('none');
+      return stt;
+    })();
+    return upd.stt[key];
+  };
+
   /*let pub=false;*/
   const pub={};
   set.pub=(k,nv,pv)=>{
@@ -1122,9 +1133,9 @@ enn.cach=(cac={})=>{
       if(yes){
         c.set=set.rich;
         enn.itrt(mod,(name,hndl)=>{
-          c[name]=(...arg)=>{
-            upd.arw('gone'); 
-            return hndl(...arg);
+          c[name]=(name,...arg)=>{
+            upd.prob(name).arw('gone'); 
+            return hndl(name,...arg);
           };
         });
       }else{
@@ -1136,12 +1147,14 @@ enn.cach=(cac={})=>{
       rich=yes;
       return c;
     },
-    done:(hndl)=>{
-      upd.act('done',hndl);
+    done:(name,hndl)=>{
+      upd.prob(name)
+        .act('done',hndl);
       return c;
     },
-    gone:(hndl)=>{
-      upd.act('gone',hndl);
+    gone:(name,hndl)=>{
+      upd.prob(name)
+        .act('gone',hndl);
       return c;
     },
     lab:(l,hndl)=>{

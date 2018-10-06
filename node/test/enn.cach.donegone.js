@@ -6,34 +6,34 @@ enn.asrt((test,end,cmnt)=>{
     .def(undefined)
     .rich(true)
   .set('a','b')
-  .done((c)=>{
+  .done('a',(c)=>{
     c.see('a',(val)=>{
       test(val==='b');
     });
-  }).gone((c)=>{
+  }).gone('a',(c)=>{
     test(false);
-  }).done((c)=>{
+  }).done('a',(c)=>{
     test(false);
-  }).gone((c)=>{
+  }).gone('a',(c)=>{
     test(false);
   }).fil('a','c')
-  .done((c)=>{
+  .done('a',(c)=>{
     test(false);
-  }).gone((c)=>{
+  }).gone('a',(c)=>{
     c.see('a',(val)=>{
       test(val==='b');
     });
-  }).gone((c)=>{
+  }).gone('a',(c)=>{
     test(false);
   });
   dg.nest('x',enn.cach({p:'q'}));
-  dg.gone((c)=>{
+  dg.gone('x',(c)=>{
     test(false);
-  }).done((c)=>{
+  }).done('x',(c)=>{
     c.see('x',(val)=>{
       test(val.get('p')==='q');
     });
-  }).done((c)=>{
+  }).done('x',(c)=>{
     test(false);
   });
 
@@ -41,9 +41,9 @@ enn.asrt((test,end,cmnt)=>{
   .set('l','m')
   .see('l',(val)=>{
     test(val==='m');
-  }).gone((c)=>{
+  }).gone('l',(c)=>{
     test(false)
-  }).done((c)=>{
+  }).done('l',(c)=>{
     test(false)
   });
   
