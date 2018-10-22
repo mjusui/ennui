@@ -1244,6 +1244,9 @@ enn.cach=(cac={})=>{
     bet:(k,h,...a)=>{
       return c.set(k,h(...a));
     },
+    clon:()=>{
+      return enn.clon(cac);
+    },
     mix:(opt={},ow=true)=>{
       let merge=c.fil;
       if(ow){
@@ -1675,13 +1678,19 @@ enn.schm=(path,...key)=>{
   const base=enn.lift('base',(name)=>{
     const scop=inst.nest(name);
 
+    let fin=false;
     const fact=enn.lift('path',(path,hndl)=>{
+      if(fin){
+        return fact;
+      }
       schm.tak(path,(key)=>{
         hndl(scop.nest(path),(opt)=>{
           return enn.cach(opt)
             .def(undefined)
             .rich(true)
             .lim(...key);
+        },()=>{
+          fin=true;
         });
       });
       return fact;

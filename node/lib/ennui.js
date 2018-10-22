@@ -123,74 +123,6 @@ enn.http.resp=(header={})=>{
     return stat;
   };
 };
-/*enn.http.resp=(cmmn=(res)=>{})=>{
-  const sc=enn.cach()
-    .def(undefined);
-  const resp=(res)=>{
-    const r={};
-    let close=false;
-    r.test=(val,hndl,hndl2)=>{
-      if(close){
-        return r;
-      }
-      if(val){
-        hndl(r);
-      }else if(hndl){
-        hndl2(r);
-      }return r;
-    };
-    r.eval=(hndl,hndl2,hndl3)=>{
-      if(hndl()){
-        hndl2(r);
-      }else if(hndl3){
-        hndl3(r);
-      }
-      return r;
-    };
-    r.cast=(name,hndl)=>{
-      if(close){
-        return r;
-      }
-      cmmn(res);
-      enn.scan(sc.get(name),(idx,hndl)=>{
-        hndl(res);
-      });
-      hndl(res);
-      res.end();
-      close=true;
-      return r;
-    };
-    return r;
-  };
-  const r={
-    def:(hndl)=>{
-      sc.def(hndl);
-      return r;
-    },
-    tmpl:(name,hndl)=>{
-      sc.val(
-        name,[]
-      ).push(hndl);
-      return r;
-    },
-    end:()=>{
-      return resp;
-    },
-  };
-  enn.scan([
-    100,101,102,103,
-    200,201,202,203,204,205,206,207,208,226,
-    300,301,302,303,304,305,306,307,308,
-    400,401,402,403,404,405,406,407,408,409,410,
-    411,412,413,414,415,416,417,418,421,422,423,424,426,451,
-    500,501,502,503,504,505,506,507,508,509,510
-  ],(idx,code)=>{
-    r.tmpl(code,(res)=>{
-      res.statusCode=code;
-    });
-  });
-  return r;
-};*/
 enn.http.serv=(
   cmmn=(req,res,end)=>{},opt={}
 )=>{
@@ -329,6 +261,21 @@ req={
     return ht;
   };
   return ht;
+};
+enn.oauth2={};
+enn.oauth2.serv=(...arg)=>{
+  const serv=enn.http.serv(...arg);
+  const regist=enn.lift('regist',(path,hndl)=>{
+    serv.post(path,hndl);
+    return authorize;
+  }).end();
+
+  const authorize=enn.lift('authorize',(path,hndl)=>{
+    serv.post(path,hndl);
+    return serv;
+  }).end();
+
+  return regist;
 };
 
 const fork=enn.cach().def((opt)=>{

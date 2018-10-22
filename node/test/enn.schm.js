@@ -6,6 +6,13 @@ enn.asrt((test,end,cmnt)=>{
     .schm('/v1/b','name','val','aname')
   .end();
 
+  schm.base('n')
+  .path('/v1/a',(all,one,end)=>{
+    end();
+  }).path('/v1/b',()=>{
+    test(false);
+  });
+
   schm.base('x')
   .path('/v1/c',(all,one)=>{
     test(false);
