@@ -124,7 +124,7 @@ enn.http.resp=(header={})=>{
   };
 };
 enn.http.serv=(
-  cmmn=(req,res,end)=>{},opt={}
+  cmmn=(req,res,opt)=>{},opt={}
 )=>{
   const o=enn.http.prs(opt);
   const tr=enn.tree();
