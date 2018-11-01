@@ -236,6 +236,10 @@ req={
       return ht;
     };
   });
+  ht.ref(hndl)=>{
+    hndl(ht);
+    return ht;
+  };
   ht.def=(hndl)=>{
     def=hndl;
     return ht;
