@@ -236,7 +236,7 @@ req={
       return ht;
     };
   });
-  ht.ref(hndl)=>{
+  ht.ref=(hndl)=>{
     hndl(ht);
     return ht;
   };
