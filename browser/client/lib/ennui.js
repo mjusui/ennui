@@ -96,6 +96,11 @@ enn.lift=(name,val)=>{
 
   return l;
 };
+enn.roux=(hndl,...some)=>{
+  return (...arg)=>{
+    hndl(...arg.concat(some));
+  };
+};
 enn.tokn=(hndl,t=1)=>{
   return (...arg)=>{
     if(t-- < 1)
