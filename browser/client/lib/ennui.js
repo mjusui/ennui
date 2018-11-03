@@ -96,10 +96,19 @@ enn.lift=(name,val)=>{
 
   return l;
 };
-enn.roux=(hndl,...some)=>{
+enn.soup=(...hn)=>{
   return (...arg)=>{
-    hndl(...arg.concat(some));
+    enn.scan(hn,(idx,hndl)=>{
+      hndl(...arg);
+    });
   };
+};
+enn.roux=(hndl,...org)=>{
+  return enn.lift('l',(...arg)=>{
+    return hndl(...arg.concat(org));
+  }).end('r',(...arg)=>{
+    return hndl(...org.concat(arg));
+  });
 };
 enn.tokn=(hndl,t=1)=>{
   return (...arg)=>{

@@ -7,7 +7,12 @@ enn.asrt((test,end,cmnt)=>{
     test(a[1]==='b');  
     test(a[2]==='c');  
     test(a[3]==='d');  
-    end();
-  },'c','d')('a','b');
-
-},4);
+  },'c','d').l('a','b');
+  enn.roux((...a)=>{
+    test(a[0]==='a');  
+    test(a[1]==='b');  
+    test(a[2]==='c');  
+    test(a[3]==='d');  
+  },'a','b').r('c','d');
+  end();
+},8);
