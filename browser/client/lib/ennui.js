@@ -2391,7 +2391,10 @@ enn.http.prs=(opt={},ow={})=>{
   o.url=ow.url||opt.url||'';
   o.protocol=ow.protocol||ow.prot||
     opt.protocol||opt.prot||'https:'
-  o.protocol=o.protocol.replace(/\/\/$/,'');
+  o.protocol=o.protocol
+    .replace(/\/\/$/,'')
+    .replace(/:$/,'')
+    +':'
   o.prot=o.protocol;
   o.key=ow.key||opt.key||'';
   o.cert=ow.cert||opt.cert||'';

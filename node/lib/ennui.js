@@ -44,8 +44,67 @@ enn.http.dat=(o,para)=>{
   }
   return d;
 };
-enn.http.req=(method,opt,hndl)=>{
+enn.strm={};
+enn.strm.http={};
+enn.strm.http.req=(meth,opt,hndl,end=()=>{})=>{
   const o=enn.http.prs(opt,{
+    method:meth
+  });
+  let url=enn.http.bld(o,opt.para);
+
+  if(!hndl){
+    return url;
+  }
+
+  let http=require('http');
+  if(o.protocol==='https:')
+    http=require('https');
+
+  const req=http.request(o.url||o,(res)=>{
+    res.on('data',hndl);
+    res.on('end',end);
+  });
+  req.on('error',(e)=>{
+    console.error(e.message);
+  });
+
+  let data=enn.http.dat(o,opt.para);
+  if(data){
+    req.write(data);
+  }
+  req.end();
+
+};
+enn.strm.http.head=enn.roux(
+  enn.strm.http.req,
+  'HEAD').r
+enn.strm.http.get=enn.roux(
+  enn.strm.http.req,
+  'GET').r
+enn.strm.http.put=enn.roux(
+  enn.strm.http.req,
+  'PUT').r
+enn.strm.http.post=enn.roux(
+  enn.strm.http.req,
+  'POST').r
+enn.strm.http.delete=enn.roux(
+  enn.strm.http.req,
+  'DELETE').r
+
+
+enn.http.req=(meth,opt,hndl)=>{
+  if(!hndl){
+    return enn.strm.http.req(meth,opt);
+  }
+
+  let body='';
+  enn.strm.http.req(meth,opt,(data)=>{
+    body+=data;
+  },()=>{
+    hndl(body);
+  });
+
+  /*const o=enn.http.prs(opt,{
     method:method,
   });
   let url=enn.http.bld(o,opt.para);
@@ -75,7 +134,7 @@ enn.http.req=(method,opt,hndl)=>{
   if(data){
     req.write(data);
   }
-  req.end();
+  req.end();*/
 };
 enn.http.resp=(header={})=>{
   return (res,opt)=>{
@@ -266,6 +325,7 @@ req={
   };
   return ht;
 };
+
 enn.oauth2={};
 enn.oauth2.serv=(...arg)=>{
   const serv=enn.http.serv(...arg);
@@ -281,7 +341,7 @@ enn.oauth2.serv=(...arg)=>{
 
   return regist;
 };
-
+const strm={};
 const fork=enn.cach().def((opt)=>{
   enn.loop(os.cpu.core,(cnt)=>{
     clust.fork();
@@ -322,6 +382,7 @@ enn.clust=(name='cpu',opt={})=>{
   };
   return c;
 };
+
 
 enn.hash=(val,hndl)=>{
   const hash=crypto.createHash('sha512');
