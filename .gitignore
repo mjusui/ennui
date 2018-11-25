@@ -6,6 +6,6 @@ log
 *.old
 *.bak
 *.log
-node_modeles
+node_modules
 ennui.server.js
 *.swp
