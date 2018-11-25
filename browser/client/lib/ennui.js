@@ -60,12 +60,12 @@ enn.elem=(q,v,p=document)=>{
   }
   return p[f](v);
 };
-enn.text=(txt='')=>{
+/*enn.text=(txt='')=>{
   return document.createTextNode(txt);
 };
 enn.make=(tag='div')=>{
   return document.createElement(tag);
-};
+};*/
 enn.whic=(w=true,a=null,b=null)=>{
   if(w){
     return a;
@@ -154,22 +154,6 @@ enn.itrt=(obj,hndl)=>{
     hndl(name,obj[name],end);
   });
 };
-/*enn.itrt=(obj,hndl)=>{
-  const key=enn.key(obj);
-  const len=key.length;
-  let cnt=0;
-  const res=undefined;
-  const end=(r)=>{
-    cnt=len;
-    res=r;
-    return r;
-  };
-  while(cnt < len){
-    const k=key[cnt++];
-    hndl(k,obj[k],end);
-  }
-  return res;
-};*/
 enn.flat=(some,hndl)=>{
   let cnt=0
   let fin=false;
@@ -2090,7 +2074,7 @@ enn.hndl=(tgt)=>{
   };
   return h;
 };
-const real=(elm)=>{
+/*const real=(elm)=>{
   return elm.real || elm;
 };
 const clas=enn.cach()
@@ -2339,7 +2323,24 @@ enn.tmpl.text=(...arg)=>{
   return tmpl(
     enn.text, ...arg
   );
+};*/
+enn.dom={};
+enn.dom.elem=(q='tag',v='div',p=document)=>{
+  let g='getElementById';
+  switch(q){
+    case 'id': g='getElementById';break;
+    case 'tag': g='getElementsByTagName';break;
+    case 'name': g='getElementsByName';break;
+    case 'class': g='getElementsByClassName';break;
+  }
+  return p[g](v);
 };
+enn.dom.make=(tag='div')=>{
+  return document.createElement(tag);
+};
+enn.dom.text=(txt='')=>{
+  return document.createTextNode(txt);
+}
 
 enn.rand=(mult=17)=>{
   return Math.floor(

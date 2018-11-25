@@ -8,6 +8,7 @@ enn.asrt((test,end,cmnt)=>{
 
   chrome.chain()
   .goto('http://masquerade.ninja')
+  .console(console.log)
   .evaluate(()=>{
      return document
      .getElementsByTagName(
