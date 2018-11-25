@@ -2,6 +2,7 @@ tmp
 old
 bak
 log
+data
 *.tmp
 *.old
 *.bak
