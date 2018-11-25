@@ -27,7 +27,10 @@ enn.asrt((test,end,cmnt)=>{
   .bet('c',()=>{return 'z';})
   .see('c',(val)=>{
     test(val==undefined);
-  })
+  }).sam('s','b')
+  .see('s',(val)=>{
+    test(val==undefined);
+  });
   lim.nest('c',enn.cach({p:'q'}));
   lim.see('c',(val)=>{
     test(val==undefined);
@@ -40,4 +43,4 @@ enn.asrt((test,end,cmnt)=>{
   });
 
   end();
-},7);
+},8);

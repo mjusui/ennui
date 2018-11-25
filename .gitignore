@@ -1,3 +1,11 @@
+tmp
+old
+bak
+log
+*.tmp
+*.old
+*.bak
+*.log
 node_modeles
 ennui.server.js
 *.swp

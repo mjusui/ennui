@@ -43,12 +43,6 @@ enn.print=(one,...oth)=>{
     one,...oth
   ).sep());
 };
-enn.bench=(hndl,...arg)=>{
-  const t=new Date().getTime();
-  hndl(...arg); 
-  const dt=new Date().getTime();
-  console.log(`Time(ms): ${dt-t}`);
-};
 enn.elem=(q,v,p=document)=>{
   let f='getElementById';
   switch(q){
@@ -77,6 +71,18 @@ enn.whic=(w=true,a=null,b=null)=>{
     return a;
   }
   return b;
+};
+enn.help=(hndl)=>{
+  const hl={};
+  hndl((name,hndl)=>{
+    hl[name]=hndl;
+  });
+  const main=enn.lift('main',(hndl)=>{
+    return (...arg)=>{
+      return hndl(hl,...arg);
+    };
+  }).end();
+  return main;
 };
 enn.lift=(name,val)=>{
   const ret={};
@@ -645,6 +651,17 @@ enn.regex=(txt,f='g')=>{
     },
   };
 };
+enn.bench=(hndl)=>{
+  const t=new Date().getTime();
+  let m='';
+  hndl(()=>{
+    const dt=new Date().getTime() - t;
+    console.log(`Time (${dt} ms): ${m}`);
+    return dt;
+  },(msg)=>{
+    m=msg;
+  });
+};
 enn.asrt=(hndl,exam=1)=>{
   let good=0;
   let chnc=0; 
@@ -1113,7 +1130,6 @@ enn.cach=(cac={})=>{
     return upd.stt[key];
   };
 
-  /*let pub=false;*/
   const pub={};
   set.pub=(k,nv,pv)=>{
     enn.scan(pub[k]||[],(idx,hndl)=>{
@@ -1241,6 +1257,28 @@ enn.cach=(cac={})=>{
           .rich(rich);
       });
     },
+    nest2:(name,name2,scion)=>{
+      return c.nest(name)
+        .nest(name2,scion);
+    },
+    nest3:(name,name2,name3,scion)=>{
+      return c.nest(name)
+        .nest(name2)
+        .nest(name3,scion);
+    },
+    nest4:(name,name2,name3,name4,scion)=>{
+      return c.nest(name)
+        .nest(name2)
+        .nest(name3)
+        .nest(name4,scion);
+    },
+    nest5:(name,name2,name3,name4,name5,scion)=>{
+      return c.nest(name)
+        .nest(name2)
+        .nest(name3)
+        .nest(name4)
+        .nest(name5,scion);
+    },
     eval:(name,hndl, ...arg)=>{
       return c.get(name)||c.bet(
         name,hndl,...arg
@@ -1274,6 +1312,9 @@ enn.cach=(cac={})=>{
       return c;
     },
     set:set.set,
+    sam:(k,t)=>{
+      return c.set(k,c.get(t));
+    },
     sub:(hndl, ...key)=>{
       enn.scan(key,(idx,k)=>{
         pub[k]=pub[k]||[];
@@ -1331,6 +1372,7 @@ enn.cach=(cac={})=>{
   mod.bet=c.bet;
   mod.fil=c.fil;
   mod.del=c.del;
+  mod.sam=c.sam;
   return c;
 };
 enn.chan=(v=null)=>{
@@ -1491,18 +1533,10 @@ enn.tree=(root)=>{
       root.rich(...arg);
       return t;
     },
-    /*prob:(...arg)=>{
-      root.prob(...arg);
-      return t;
-    },*/
     def:(...arg)=>{
       root.def(...arg);
       return t;
     },
-    /*pub:(...arg)=>{
-      root.pub(...arg);
-      return t;
-    },*/
     lab:(...arg)=>{
       root.lab(...arg);
       return t;
@@ -1605,10 +1639,6 @@ enn.tree=(root)=>{
         return val;
       },...some);
     },
-    /*bet:(name,hndl,...some)=>{
-      t.eval(name,hndl,...some);
-      return t;
-    },*/
     bet1:(hndl,one)=>{
       root.bet(one,hndl);
       return t;

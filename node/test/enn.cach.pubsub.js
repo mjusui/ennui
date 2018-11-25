@@ -18,10 +18,12 @@ enn.asrt((test,end,cmnt)=>{
     ) || (cnt==4) && (
       name==='x' && val==undefined && prev==='z'
     ) || (cnt==5) && (
+      name==='s' && val==='c' && prev==undefined
+    ) || (cnt==6) && (
       name==='p' && val.get('p')==='q' && prev==undefined
     ));
     cnt++;
-  },'a','x','p','n')
+  },'a','x','p','n','s')
   .fil('a','b')
   .set('a','c')
   .fil('a','d')
@@ -33,6 +35,7 @@ enn.asrt((test,end,cmnt)=>{
   .see('x',(val)=>{
     test(val==='z');
   }).del('x')
+  .sam('s','a')
   .nest('p',enn.cach({p:'q'}));
 
   pub.rich(false)
@@ -42,4 +45,4 @@ enn.asrt((test,end,cmnt)=>{
   });
 
   end();
-},9);
+},10);

@@ -25,6 +25,13 @@ enn.asrt((test,end,cmnt)=>{
     });
   }).gone('a',(c)=>{
     test(false);
+  }).sam('s','a')
+  .done('s',(c)=>{
+    c.see('s',(val)=>{
+      test(val==='b');
+    });
+  }).gone('s',(c)=>{
+    test(false);
   });
   dg.nest('x',enn.cach({p:'q'}));
   dg.gone('x',(c)=>{
@@ -48,5 +55,5 @@ enn.asrt((test,end,cmnt)=>{
   });
   
   end();
-},4);
+},5);
 
