@@ -72,18 +72,6 @@ enn.whic=(w=true,a=null,b=null)=>{
   }
   return b;
 };
-enn.help=(hndl)=>{
-  const hl={};
-  hndl((name,hndl)=>{
-    hl[name]=hndl;
-  });
-  const main=enn.lift('main',(hndl)=>{
-    return (...arg)=>{
-      return hndl(hl,...arg);
-    };
-  }).end();
-  return main;
-};
 enn.lift=(name,val)=>{
   const ret={};
 
@@ -115,6 +103,15 @@ enn.roux=(hndl,...org)=>{
   }).end('r',(...arg)=>{
     return hndl(...org.concat(arg));
   });
+};
+enn.appl=(val)=>{
+  const appl=enn.lift('appl',(hndl)=>{
+    val=hndl(val);
+    return appl;
+  }).end('end',()=>{
+    return val;
+  });
+  return appl;
 };
 enn.tokn=(hndl,t=1)=>{
   return (...arg)=>{
