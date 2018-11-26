@@ -1686,7 +1686,7 @@ enn.tree=(root)=>{
   };
   return t;
 };
-enn.schm=(path,...key)=>{
+/*enn.schm=(path,...key)=>{
   const schm=enn.cach()
     .def(undefined)
   const conf=enn.lift('schm',(path,...key)=>{
@@ -1724,7 +1724,7 @@ enn.schm=(path,...key)=>{
     return fact;
   }).end();
   return conf;
-};
+};*/
 
 const pal={
   nil:{r:0,g:0,b:0,a:0}
@@ -2330,7 +2330,8 @@ enn.dom.elem=(q='tag',v='div',p=document)=>{
     case 'name': g='getElementsByName';break;
     case 'class': g='getElementsByClassName';break;
   }
-  return p[g](v);
+  const el=p[g](v);
+  return el[0]||el;
 };
 enn.dom.make=(tag='div')=>{
   return document.createElement(tag);
@@ -2338,6 +2339,91 @@ enn.dom.make=(tag='div')=>{
 enn.dom.text=(txt='')=>{
   return document.createTextNode(txt);
 }
+enn.dom.deco=(el)=>{
+  const deco=enn.lift('test',(val,hndl,hndl2)=>{
+    if(val)
+      if(hndl)
+        hndl(deco);
+    else if(hndl2)
+      hndl2(deco);
+    return deco;
+  }).lift('bind',(name,hndl)=>{
+    el.addEventListener(name,hndl);
+    return deco;
+  }).lift('attr',(name,val='')=>{
+    el.setAttribute(name,val);
+    return deco;
+  }).lift('id',(val='')=>{
+    return deco.attr('id',val);
+  }).lift('name',(val='')=>{
+    return deco.attr('name',val);
+  }).lift('clas',(...cl)=>{
+    return deco.attr(
+      'class',
+      enn.cnct(...cl)
+    .sep());
+  }).lift('prop',(name,val='')=>{
+	      el[name]=val;
+      return deco;
+  }).lift('cont',(val='')=>{
+    return deco.prop('textContent',val);
+  }).lift('valu',(val='')=>{
+    return deco.prop('value',val);
+  }).lift('styl',(name,val='')=>{
+    el.style[name]=val;
+    return deco;
+  }).lift('apen',(chld)=>{
+    el.appendChild(chld);
+    return deco;
+  }).lift('prep',(chld)=>{
+    el.insertBefore(chld,el.children[0]);
+    return deco;
+  }).lift('remv',(chld)=>{
+    if(chld)
+      el.removeChild(chld);
+    else
+      enn.scan(el.children,(idx,chld)=>{
+        el.removeChild(chld);
+      });
+    return deco;
+  }).lift('blon',(prnt)=>{
+    prnt.appendChild(el);
+    return deco;
+  }).lift('lead',(prnt)=>{
+    prnt.insertBefore(el,prnt.children[0]);
+    return deco;
+  }).lift('leav',()=>{
+    el.parentNode.removeChild(el);
+    return deco;
+  }).lift('musl',(bro)=>{
+    bro.parentNode.insertBefore(el,bro);
+    return deco;
+  }).lift('fllw',(sis)=>{
+    sis.parentNode.insertBefore(el,sis.nextSbling)
+    return deco;
+  }).lift('raw',()=>{
+    return deco.end();
+  }).lift('real',()=>{
+    return deco.end();
+  }).end('end',()=>{
+    return el;
+  });
+  return deco;
+};
+const pttn=enn.cach()
+  .def(undefined);
+enn.dom.pttn=(name,hndl)=>{
+  return pttn.eval(name,hndl);
+};
+const vogu=enn.cach()
+  .def(undefined);
+enn.dom.vogu=(name)=>{
+  return vogu.eval(name,()=>{
+    return enn.cach()
+      .def(undefined)
+      .rich(true);
+  });
+};
 
 enn.rand=(mult=17)=>{
   return Math.floor(
