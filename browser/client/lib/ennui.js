@@ -104,15 +104,6 @@ enn.roux=(hndl,...org)=>{
     return hndl(...org.concat(arg));
   });
 };
-enn.appl=(val)=>{
-  const appl=enn.lift('appl',(hndl)=>{
-    val=hndl(val);
-    return appl;
-  }).end('end',()=>{
-    return val;
-  });
-  return appl;
-};
 enn.tokn=(hndl,t=1)=>{
   return (...arg)=>{
     if(t-- < 1)
@@ -1356,6 +1347,22 @@ enn.cach=(cac={})=>{
   mod.sam=c.sam;
   return c;
 };
+enn.mod={};
+const vogu=enn.cach()
+  .def(undefined);
+enn.mod.vogu=(name,del)=>{
+  const vg=vogu.eval(name,()=>{
+    return enn.cach()
+      .def(undefined)
+      .rich(true);
+  });
+  if(del){
+    del(vg);
+    vogu.del(name);
+    return;
+  }
+  return vg;
+};
 enn.chan=(v=null)=>{
   let len=0;
   let hed=null;
@@ -1686,7 +1693,7 @@ enn.tree=(root)=>{
   };
   return t;
 };
-/*enn.schm=(path,...key)=>{
+enn.schm=(path,...key)=>{
   const schm=enn.cach()
     .def(undefined)
   const conf=enn.lift('schm',(path,...key)=>{
@@ -1724,7 +1731,7 @@ enn.tree=(root)=>{
     return fact;
   }).end();
   return conf;
-};*/
+};
 
 const pal={
   nil:{r:0,g:0,b:0,a:0}
@@ -1969,7 +1976,7 @@ enn.stea=(flg)=>{
   return s;
 
 };
-enn.mode=(ary)=>{
+/*enn.mode=(ary)=>{
   const mod=enn.ring(ary);
   const ptn={};
   const val={};
@@ -1997,12 +2004,6 @@ enn.mode=(ary)=>{
       }
       return val;
     },
-    /*val:(ptn)=>{
-      return {
-        pos:(x)=>{return ptn[mod.pos(x)];},
-        val:()=>{return ptn[mod.cur()];},
-      };
-    }*/
   };
   enn.itrt(mod,(name,func)=>{
     m[name]=m[name]||func;
@@ -2011,8 +2012,8 @@ enn.mode=(ary)=>{
   m.bak=()=>{return chng(mod.bak());};
   m.cur=()=>{return chng(mod.cur());};
   return m;
-};
-enn.sock=(opt)=>{
+};*/
+/*enn.sock=(opt)=>{
   const soc=new WebSocket(
     opt.url,
     opt.prot
@@ -2070,7 +2071,7 @@ enn.hndl=(tgt)=>{
     },
   };
   return h;
-};
+};*/
 /*const real=(elm)=>{
   return elm.real || elm;
 };
@@ -2365,7 +2366,7 @@ enn.dom.deco=(el)=>{
   }).lift('prop',(name,val='')=>{
 	      el[name]=val;
       return deco;
-  }).lift('cont',(val='')=>{
+  }).lift('text',(val='')=>{
     return deco.prop('textContent',val);
   }).lift('valu',(val='')=>{
     return deco.prop('value',val);
@@ -2414,15 +2415,6 @@ const pttn=enn.cach()
   .def(undefined);
 enn.dom.pttn=(name,hndl)=>{
   return pttn.eval(name,hndl);
-};
-const vogu=enn.cach()
-  .def(undefined);
-enn.dom.vogu=(name)=>{
-  return vogu.eval(name,()=>{
-    return enn.cach()
-      .def(undefined)
-      .rich(true);
-  });
 };
 
 enn.rand=(mult=17)=>{

@@ -6,6 +6,10 @@ enn.asrt((test,end,cmnt)=>{
   const lim=enn.cach()
     .def(undefined)
     .rich(true)
+    .set('v','w')
+    .see('v',(val)=>{
+      test(val==='w');
+    })
   .lim('a','b')
   .sub((name,val,prev)=>{
     test((cnt==0) && (
@@ -28,7 +32,9 @@ enn.asrt((test,end,cmnt)=>{
   .see('c',(val)=>{
     test(val==undefined);
   }).sam('s','b')
-  .see('s',(val)=>{
+  .see('v',(val)=>{
+    test(val===undefined);
+  }).see('s',(val)=>{
     test(val==undefined);
   });
   lim.nest('c',enn.cach({p:'q'}));
@@ -43,4 +49,4 @@ enn.asrt((test,end,cmnt)=>{
   });
 
   end();
-},8);
+},10);

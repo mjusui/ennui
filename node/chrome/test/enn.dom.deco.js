@@ -8,7 +8,7 @@ enn.chrm.eval('./index.html',()=>{
     ).id('id')
     .name('name')
     .clas('clas')
-    .cont('test')
+    .text('test')
     .blon(enn.dom.elem('id','body'))
     .test(true,(dc)=>{
       dc.attr('label','label');
