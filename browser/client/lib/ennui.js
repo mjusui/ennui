@@ -1116,6 +1116,7 @@ enn.cach=(cac={})=>{
       hndl(k,l);
     });
   };
+  const trig={};
   const c={
     type:'enn',
     raw:(hndl)=>{
@@ -1286,6 +1287,13 @@ enn.cach=(cac={})=>{
     set:set.set,
     sam:(k,t)=>{
       return c.set(k,c.get(t));
+    },
+    trig:(name,hndl)=>{
+      trig[name]=hndl;
+      return c;  
+    },
+    fire:(name,...arg)=>{
+      return trig[name](c,...arg)||c;
     },
     sub:(hndl, ...key)=>{
       enn.scan(key,(idx,k)=>{
@@ -2340,6 +2348,8 @@ enn.dom.make=(tag='div')=>{
 enn.dom.text=(txt='')=>{
   return document.createTextNode(txt);
 }
+const clas=enn.cach()
+  .def(undefined);
 enn.dom.deco=(el)=>{
   const deco=enn.lift('test',(val,hndl,hndl2)=>{
     if(val)
@@ -2358,11 +2368,13 @@ enn.dom.deco=(el)=>{
     return deco.attr('id',val);
   }).lift('name',(val='')=>{
     return deco.attr('name',val);
-  }).lift('clas',(...cl)=>{
+  }).lift('clas',(name,...cl)=>{
     return deco.attr(
       'class',
-      enn.cnct(...cl)
-    .sep());
+    clas.eval(name,()=>{
+      return enn.cnct(...cl)
+        .sep();
+    }));
   }).lift('prop',(name,val='')=>{
 	      el[name]=val;
       return deco;

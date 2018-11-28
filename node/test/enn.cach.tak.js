@@ -1,7 +1,7 @@
 enn=require('../lib/ennui.js');
 
 enn.asrt((test,end,cmnt)=>{
-  cmnt('enn.cach.lim');
+  cmnt('enn.cach.tak');
   const tak=enn.cach()
     .def(undefined)
     .fil('a','x')
