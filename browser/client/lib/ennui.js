@@ -1054,7 +1054,17 @@ enn.cach=(cac={})=>{
   };
   let rich=false;
   set.rich=(k,v)=>{
-    set.lim(k,()=>{
+    if(set.lim(k) ){
+      const pv=c.get(k);
+
+        set.def(k,v);
+
+        upd.prob(k)
+          .arw('done');
+      if(v != pv)
+        set.pub(k,v,pv);
+    }
+    /*set.lim(k,()=>{
       const pv=c.get(k);
 
       set.def(k,v);
@@ -1062,12 +1072,17 @@ enn.cach=(cac={})=>{
       upd.prob(k)
         .arw('done');
       set.pub(k,v,pv);
-    });
+    });*/
     return c;
   };
   set.set=set.def;
   let lim=[];
-  set.lim=(k,hndl)=>{
+  set.lim=(k)=>{
+    return !lim.length||enn.scan(lim,(idx,name,end)=>{
+      k==name && end(true);
+    })||false;
+  }
+  /*set.lim=(k,hndl)=>{
     if(!lim.length){
       hndl();
       return;
@@ -1075,7 +1090,7 @@ enn.cach=(cac={})=>{
     enn.scan(lim,(idx,name,end)=>{
       k==name && end(true)
     }) && hndl();
-  };
+  };*/
   const upd={};
   upd.stt={};
   upd.rst=()=>{

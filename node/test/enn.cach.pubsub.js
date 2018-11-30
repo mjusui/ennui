@@ -21,7 +21,7 @@ enn.asrt((test,end,cmnt)=>{
       name==='s' && val==='c' && prev==undefined
     ) || (cnt==6) && (
       name==='p' && val.get('p')==='q' && prev==undefined
-    ));
+    ) || false);
     cnt++;
   },'a','x','p','n','s')
   .fil('a','b')
@@ -38,6 +38,11 @@ enn.asrt((test,end,cmnt)=>{
   .sam('s','a')
   .nest('p',enn.cach({p:'q'}));
 
+  pub.set('a','c')
+    .del('x')
+    .set('x',undefined)
+  test(cnt==7);
+
   pub.rich(false)
   .set('l','m')
   .see('l',(val)=>{
@@ -45,4 +50,4 @@ enn.asrt((test,end,cmnt)=>{
   });
 
   end();
-},10);
+},11);

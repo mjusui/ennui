@@ -25,6 +25,13 @@ enn.asrt((test,end,cmnt)=>{
     });
   }).gone('a',(c)=>{
     test(false);
+  }).set('a','b')
+  .gone('a',(c)=>{
+    test(false);
+  }).done('a',(c)=>{
+    c.see('a',(val)=>{
+      test(val==='b');
+    });
   }).sam('s','a')
   .done('s',(c)=>{
     c.see('s',(val)=>{
@@ -55,5 +62,5 @@ enn.asrt((test,end,cmnt)=>{
   });
   
   end();
-},5);
+},6);
 
