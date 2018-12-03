@@ -90,6 +90,18 @@ enn.lift=(name,val)=>{
 
   return l;
 };
+enn.help=(name,val)=>{
+  const hl={};
+  const conf=enn.lift('help',(name,val)=>{
+    hl[name]=val;
+    return conf;
+  }).end('end',(hndl)=>{
+    return (...arg)=>{
+      return hndl(hl,...arg);
+    };
+  });
+  return conf.help(name,val);
+};
 enn.soup=(...hn)=>{
   return (...arg)=>{
     enn.scan(hn,(idx,hndl)=>{
@@ -2390,6 +2402,10 @@ enn.dom.deco=(el)=>{
       return enn.cnct(...cl)
         .sep();
     }));
+  }).lift('src',(src='')=>{
+    return deco.attr('src',src);
+  }).lift('type',(typ='')=>{
+    return deco.attr('type',typ);
   }).lift('prop',(name,val='')=>{
 	      el[name]=val;
       return deco;
