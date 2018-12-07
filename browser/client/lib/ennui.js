@@ -1475,6 +1475,9 @@ enn.cach=(cac={})=>{
   mod.sam=c.sam;
   mod.next=c.next;
   mod.back=c.back;
+  mod.seek=c.seek;
+  mod.head=c.head;
+  mod.tail=c.tail;
   return c;
 };
 enn.mod={};
@@ -2544,6 +2547,9 @@ enn.dom.deco=(el)=>{
     return deco;
   }).lift('fllw',(sis)=>{
     sis.parentNode.insertBefore(el,sis.nextSbling)
+    return deco;
+  }).lift('fire',(name,...arg)=>{
+    el[name](...arg);
     return deco;
   }).lift('raw',()=>{
     return deco.end();
