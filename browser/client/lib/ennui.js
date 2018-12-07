@@ -43,7 +43,7 @@ enn.print=(one,...oth)=>{
     one,...oth
   ).sep());
 };
-enn.elem=(q,v,p=document)=>{
+/*enn.elem=(q,v,p=document)=>{
   let f='getElementById';
   switch(q){
     case 'i':f='getElementById';break;
@@ -60,18 +60,18 @@ enn.elem=(q,v,p=document)=>{
   }
   return p[f](v);
 };
-/*enn.text=(txt='')=>{
+enn.text=(txt='')=>{
   return document.createTextNode(txt);
 };
 enn.make=(tag='div')=>{
   return document.createElement(tag);
 };*/
-enn.whic=(w=true,a=null,b=null)=>{
+/*enn.whic=(w=true,a=null,b=null)=>{
   if(w){
     return a;
   }
   return b;
-};
+};*/
 enn.lift=(name,val)=>{
   const ret={};
 
@@ -154,7 +154,7 @@ enn.itrt=(obj,hndl)=>{
     hndl(name,obj[name],end);
   });
 };
-enn.flat=(some,hndl)=>{
+/*enn.flat=(some,hndl)=>{
   let cnt=0
   let fin=false;
   let ret=undefined;
@@ -182,7 +182,7 @@ enn.flat=(some,hndl)=>{
   };
   nest(some,hndl);
   return ret;
-};
+};*/
 enn.seri={};
 enn.seri.loop=(len,hndl,hed=0,tal=0)=>{
   len=len - tal;
@@ -474,7 +474,7 @@ enn.para.rmap.race=(hndl)=>{
   return r;
 };
 
-enn.rcrs=(nest,...some)=>{
+/*enn.rcrs=(nest,...some)=>{
   enn.scan(some,(idx,val,end)=>{
     nest(val,end);
   },0,1);
@@ -483,10 +483,10 @@ enn.rcrs=(nest,...some)=>{
       some[some.length-1]
     );
   }};
-};
+};*/
 const rmap={};
 enn.scan([
-  'loop','scan','flat'
+  'loop','scan'/*,'flat'*/
 ],(idx,hname)=>{
   rmap[hname]=(tgt,hndl,trim=false)=>{
     const res=[];
@@ -532,7 +532,7 @@ enn.scan([
   };
 });
 enn.rmap=rmap;
-enn.land=(name,rsrc)=>{
+/*enn.land=(name,rsrc)=>{
   const lnd={};
   const l={
     add:(name,rsrc)=>{
@@ -554,8 +554,8 @@ enn.land=(name,rsrc)=>{
   };
   if(name&&rsrc)w.add(name,rsrc);
   return w
-};
-enn.alias=(als={})=>{
+};*/
+/*enn.alias=(als={})=>{
   const cac=enn.cach(als);
   const a={
     def:(v)=>{
@@ -634,7 +634,7 @@ enn.regex=(txt,f='g')=>{
       return res;
     },
   };
-};
+};*/
 enn.bench=(hndl)=>{
   const t=new Date().getTime();
   let m='';
@@ -675,18 +675,18 @@ enn.asrt=(hndl,exam=1)=>{
   };
   hndl(test,end,cmnt);
 };
-enn.test=(val,hndl,hndl2)=>{
+/*enn.test=(val,hndl,hndl2)=>{
   if(val)
     hndl();
   else
     hndl2();
-};
-enn.eval=(hndl,hndl1,hndl2)=>{
+};*/
+/*enn.eval=(hndl,hndl1,hndl2)=>{
   if(hndl())
     hndl1();
   else
     hndl2();
-};
+};*/
 enn.type=(tgt,tname='obj',hndl)=>{
   if(hndl){
     return enn.type(
@@ -754,7 +754,7 @@ enn.type=(tgt,tname='obj',hndl)=>{
   }
   return typeof tgt===tname;
 };
-enn.vlid=(...hd)=>{
+/*enn.vlid=(...hd)=>{
   return (val)=>{
     let ret=undefined;
     enn.scan(hd,(idx,hndl,end)=>{
@@ -762,8 +762,8 @@ enn.vlid=(...hd)=>{
     });
     return ret;
   };
-};
-enn.flag=(flg={})=>{
+};*/
+/*enn.flag=(flg={})=>{
   const hup={};
   const hdw={};
   const f={
@@ -864,25 +864,18 @@ enn.flag=(flg={})=>{
     },
   };
   return f;
-};
+};*/
 enn.stat=(name,obj={})=>{
   let cur=obj;
   let edt=obj;
-  //const als=enn.alias();
   const stt={};
   const s={
-    /*als:(name,lname)=>{
-      als.add(name,lname);
-      return s;
-    },*/
     add:(name,obj)=>{
-      //name=als.see(name);
       stt[name]=obj;
       edt=stt[name];
       return s;
     },
     arw:(name)=>{
-      //name=als.see(name);
       cur=stt[name]||cur;
       return s;
     },
@@ -902,7 +895,7 @@ enn.stat=(name,obj={})=>{
     s.add(name,obj);
   return s;
 };
-enn.liar=(yes=true)=>{
+/*enn.liar=(yes=true)=>{
   const l={
     said:()=>{return yes;},
     say:()=>{yes=yes==false;return yes;}
@@ -1039,7 +1032,7 @@ enn.grop=(def=[])=>{
     },
   };
   return g;
-};
+};*/
 enn.clon=(obj={})=>{
   const cln=enn.cach(
     enn.rmap.itrt(obj,(name,val)=>{
@@ -1496,7 +1489,7 @@ enn.mod.vogu=(name,del)=>{
   }
   return vg;
 };
-enn.chan=(v=null)=>{
+/*enn.chan=(v=null)=>{
   let len=0;
   let hed=null;
   let csr=null;
@@ -1641,8 +1634,8 @@ enn.crwn=(opt={})=>{
     },
   };
   return c;
-};
-enn.tree=(root)=>{
+};*/
+/*enn.tree=(root)=>{
   root=root||enn.cach();
   const t={
     type:'enn',
@@ -1825,8 +1818,8 @@ enn.tree=(root)=>{
     },
   };
   return t;
-};
-enn.schm=(path,...key)=>{
+};*/
+/*enn.schm=(path,...key)=>{
   const schm=enn.cach()
     .def(undefined)
   const conf=enn.lift('schm',(path,...key)=>{
@@ -1864,9 +1857,9 @@ enn.schm=(path,...key)=>{
     return fact;
   }).end();
   return conf;
-};
+};*/
 
-const pal={
+/*const pal={
   nil:{r:0,g:0,b:0,a:0}
 };
 enn.color=(name,ow,serial)=>{
@@ -1911,8 +1904,8 @@ enn.now=(serial)=>{
   if(serial)
       return n.h+':'+n.m+':'+n.s+', '+n.w+' '+n.d+' '+n.M+' '+n.Y+' '+n.tz;
   return n;
-};
-enn.queu=()=>{
+};*/
+/*enn.queu=()=>{
   const q=[];
   return {
     enq:(o)=>{return q.push(o);},
@@ -2108,7 +2101,7 @@ enn.stea=(flg)=>{
   };
   return s;
 
-};
+};*/
 /*enn.mode=(ary)=>{
   const mod=enn.ring(ary);
   const ptn={};
@@ -2585,8 +2578,7 @@ enn.lib=(name,val,overwrite=false)=>{
 enn.timer=(job,intv=1000)=>{
   setTimeout(()=>{job();},intv);
 };
-enn.clock=(job,intv=1000)=>{
-  /* stop=0, stopping=1, running=2 */
+/*enn.clock=(job,intv=1000)=>{
   let stat=0;
   let fire=enn.fire();
   const run=()=>{
@@ -2615,10 +2607,6 @@ enn.clock=(job,intv=1000)=>{
       stt.arw('stopping');
     },
   }).add('stopping',{
-    /*start:()=>{
-      stat=2;
-      stt.arw('running');
-    },*/
     stop:(hndl)=>{
       fire.fuel('stop',hndl);
     },
@@ -2639,7 +2627,7 @@ enn.clock=(job,intv=1000)=>{
     },
   };
   return c;
-};
+};*/
 enn.http={};
 enn.http.prs=(opt={},ow={})=>{
   const o={};
@@ -2768,13 +2756,5 @@ enn.http.post=(opt,hndl)=>{
 enn.http.delete=(opt,hndl)=>{
   return enn.http.req('DELETE',opt,hndl);
 };
-/*enn.load=(js,hndl)=>{
-  const scr=enn.make('script');
-  scr.setAttribute('src',js);
-  scr.addEventListener('load',hndl);
-  enn.elem('tag','body')[0]
-    .appendChild(scr);
-  return scr;
-};*/
 
 /* ennui */};

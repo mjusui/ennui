@@ -25,9 +25,7 @@ fs.writeFileSync(dst,ennui);
 
 const enn=require(dst);
 enn.scan([
-  'elem','text','make',
-  'color','sock','clas',
-  'deco','tmpl'
+  'dom'
 ],(idx,name)=>{
   enn[name]=undefined;
 });
@@ -186,27 +184,10 @@ enn.http.serv=(
   cmmn=(req,res,opt)=>{},opt={}
 )=>{
   const o=enn.http.prs(opt);
-  const tr=enn.tree();
+  const tr=enn.cach();
   const ev={};
   let def=(req,res,opt)=>{};
   const rt=(req,res,body='')=>{
-/*
-req={
-  headers:{
-    'user-agent': '',
-    host: '',
-    accept:'',
-  },
-  httpVersion:'1.1',
-  method:'POST;,
-  rawHeaders:['user-agent','',host,'',accept,''],
-  rawTrailers:[].
-  statusCode:'404',
-  statusMessage:'NG',
-  trailers:[],
-  url:'/xxx/yy?a=b&c=d',
-};
-*/
     
     const purl=url.parse(
       req.url,true
@@ -232,9 +213,9 @@ req={
     let path=''
     let miss=true;
     const trig=(opt={})=>{
-      enn.scan(tr.get(
-        req.method, path
-      )||[], (idx,hndl,end)=>{
+      enn.scan(tr.get(req.method)
+        .get(path)||[],
+      (idx,hndl,end)=>{
         opt.end=end;
         opt.path=purl.pathname;
         opt.para=para;
