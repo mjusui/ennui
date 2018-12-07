@@ -14,8 +14,9 @@ enn.asrt((test,end,cmnt)=>{
     cac.set('a',b)
      .set('b',c)
      .set('c',a);
-  }).fire('roll')
-  .tak('a',(val)=>{
+  }).refl((cac)=>{
+    cac.fire('roll');
+  }).tak('a',(val)=>{
     test(val==='y');
   },()=>{
     test(false);

@@ -1067,7 +1067,8 @@ enn.cach=(cac={})=>{
   let rich=false;
   set.rich=(k,v)=>{
     if(set.lim(k) ){
-      const pv=c.get(k);
+      //const pv=c.get(k);
+      const pv=cac[k];
 
         set.def(k,v);
 
@@ -1144,6 +1145,35 @@ enn.cach=(cac={})=>{
     });
   };
   const trig={};
+
+  const cnt={};
+  const count=(k,p)=>{
+    cnt[k]=(cnt[k]||0) + p;
+    c.set(k,cnt[k]);
+    return cac[k];
+  };
+
+  const ring={};
+  const jump=(k,p)=>{
+    const r=ring[k];
+    r.idx=p;
+    c.set(k,r.ary[r.idx]);
+    return cac[k];
+  };
+  const head=(k)=>{
+    return jump(k,0);
+  };
+  const tail=(k)=>{
+    const r=ring[k];
+    const len=r.ary.length;
+    return jump(k,len-1);
+  };
+  const move=(k,p)=>{
+    const r=ring[k];
+    const idx=r.idx;
+    const len=r.ary.length;
+    return jump(k,(idx+len+p)%len);
+  };
   const c={
     type:'enn',
     raw:(hndl)=>{
@@ -1163,6 +1193,66 @@ enn.cach=(cac={})=>{
         cac=one;
       }
       return c;
+    },
+    cnt:(k,p=0)=>{
+      count(k,p);
+      return c;
+    },
+    mov:(k,p,hndl)=>{
+      if(hndl){
+        hndl(count(k,p) );
+        return c;
+      }
+      return count(k,p);
+    },
+    inc:(k,hndl)=>{
+      return c.mov(k,1,hndl);
+    },
+    dec:(k,hndl)=>{
+      return c.mov(k,-1,hndl);
+    },
+    ring:(k,r=[])=>{
+      ring[k]={
+        idx:0,
+        ary: r,
+      };
+      move(k,0);
+      return c;
+    },
+    seek:(k,q)=>{
+      enn.scan(ring[k].ary,(idx,val,end)=>{
+        if(val===q)
+          jump(k,end(idx) );
+      });
+      return c;
+    },
+    head:(k,hndl)=>{
+      if(hndl){
+        hndl(head(k));
+        return c;
+      }
+      return head(k);
+    },
+    tail:(k,hndl)=>{
+      if(hndl){
+        hndl(tail(k));
+        return c;
+      }
+      return tail(k);
+    },
+    next:(k,hndl)=>{
+      if(hndl){
+        hndl(move(k,1));
+        return c;
+      }
+      return move(k,1);
+    },
+    back:(k,hndl)=>{
+      if(hndl){
+        hndl(move(k,-1));
+        return c;
+      }
+      return move(k,-1);
     },
     rich:(yes=true)=>{
       if(yes){
@@ -1198,9 +1288,9 @@ enn.cach=(cac={})=>{
         lab[l]
       ),(idx,k,end)=>{
         const v=c.get(k);
-        if(v){
-          hndl(k,v,end);
-        }
+        if(cac[k]==undefined)
+          return;
+        hndl(k,cac[k],end);
       })||c;
     },
     att:(k, ...l)=>{
@@ -1213,25 +1303,25 @@ enn.cach=(cac={})=>{
       det(k,l);
       return c;
     },
-    ref:(hndl)=>{
+    refl:(hndl)=>{
       hndl(c);
       return c;
     },
     test:(val,hndl,hndl2)=>{
       if(val){
-        c.ref(hndl);
+        c.refl(hndl);
       }else if(hndl2){
-        c.ref(hndl2);
+        c.refl(hndl2);
       }
       return c;
     },
     rst:(k=null)=>{
-      csr=k && cac.get(k);
+      csr=k && cac[k];
       return c;
     },
     cur:(k='')=>{
       if(k){
-        csr=c.get(k);
+        csr=cac[k];
       }
       return csr;
     },
@@ -1320,7 +1410,7 @@ enn.cach=(cac={})=>{
       return c;  
     },
     fire:(name,...arg)=>{
-      return trig[name](c,...arg)||c;
+      return trig[name](c,...arg);
     },
     sub:(hndl, ...key)=>{
       enn.scan(key,(idx,k)=>{
@@ -1350,6 +1440,9 @@ enn.cach=(cac={})=>{
       return c.get(k);
     },
     get:(k)=>{
+      return cac[k];
+    },
+    fet:(k)=>{
       return cac[k]||def.ini(k);
     },
     del:(k)=>{
@@ -1380,6 +1473,8 @@ enn.cach=(cac={})=>{
   mod.fil=c.fil;
   mod.del=c.del;
   mod.sam=c.sam;
+  mod.next=c.next;
+  mod.back=c.back;
   return c;
 };
 enn.mod={};
@@ -2385,6 +2480,9 @@ enn.dom.deco=(el)=>{
     else if(hndl2)
       hndl2(deco);
     return deco;
+  }).lift('refl',(hndl)=>{
+    hndl(deco);
+    return deco;
   }).lift('bind',(name,hndl)=>{
     el.addEventListener(name,hndl);
     return deco;
@@ -2395,19 +2493,21 @@ enn.dom.deco=(el)=>{
     return deco.attr('id',val);
   }).lift('name',(val='')=>{
     return deco.attr('name',val);
-  }).lift('clas',(name,...cl)=>{
+  }).lift('cl',(name,...cl)=>{
     return deco.attr(
       'class',
     clas.eval(name,()=>{
       return enn.cnct(...cl)
         .sep();
     }));
+  }).lift('clas',(clas='')=>{
+    return deco.attr('class',clas);
   }).lift('src',(src='')=>{
     return deco.attr('src',src);
   }).lift('type',(typ='')=>{
     return deco.attr('type',typ);
   }).lift('prop',(name,val='')=>{
-	      el[name]=val;
+      el[name]=val;
       return deco;
   }).lift('text',(val='')=>{
     return deco.prop('textContent',val);
