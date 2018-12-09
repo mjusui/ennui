@@ -276,7 +276,7 @@ enn.http.serv=(
       return ht;
     });
   });
-  ht.lift('def',(hndl)=>{
+  ht=ht.lift('def',(hndl)=>{
     def=hndl;
     return ht;
   }).lift('bind',(name,hndl)=>{
@@ -301,6 +301,8 @@ enn.http.serv=(
     });
     ht.serv.listen(...arg);
     return ht;
+  }).lift('close',()=>{
+    ht.serv.close();
   }).end();
   return ht;
 };
@@ -326,11 +328,9 @@ const fork=enn.cach().def((opt)=>{
     clust.fork();
   });
 }).set('cpu',(opt)=>{
-  const thred=(
-    opt.thread || opt.thred || opt.th 
-  ) || (
-    os.cpu.core / (opt.ht || 1)
-  );
+console.log(os.cpu.core);
+  const thred=os.cpu.core / (opt.ht || 1);
+    
   enn.loop(thred,(cnt)=>{
     clust.fork();
   });
