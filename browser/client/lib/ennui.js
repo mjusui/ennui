@@ -474,7 +474,7 @@ enn.para.rmap.race=(hndl)=>{
   return r;
 };
 
-/*enn.rcrs=(nest,...some)=>{
+enn.rcrs=(nest,...some)=>{
   enn.scan(some,(idx,val,end)=>{
     nest(val,end);
   },0,1);
@@ -483,7 +483,7 @@ enn.para.rmap.race=(hndl)=>{
       some[some.length-1]
     );
   }};
-};*/
+};
 const rmap={};
 enn.scan([
   'loop','scan'/*,'flat'*/

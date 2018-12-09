@@ -257,39 +257,37 @@ enn.http.serv=(
     }
     rt(req,res);
   };
-  const ht={};
+  let ht=enn.lift('refl',(hndl)=>{
+    hndl(ht);
+    return ht;
+  });
   enn.itrt([
     'GET','POST','PUT','DELETE'
   ],(idx,meth)=>{
-    ht[meth.toLowerCase()]=(
-      path,hndl,prnt=false
-    )=>{
-      tr.val2(
-        [],
-        meth,
-        path
-      ).push((req,res,opt)=>{
-        if(prnt || opt.me){
+    ht.lift(
+      meth.toLowerCase(),
+    (path,hndl,prnt=false)=>{
+      tr.nest(meth)
+        .val(path,[])
+      .push((req,res,opt)=>{
+        if(prnt || opt.me)
           hndl(req,res,opt);
-        }
       });
       return ht;
-    };
+    });
   });
-  ht.ref=(hndl)=>{
-    hndl(ht);
-    return ht;
-  };
-  ht.def=(hndl)=>{
+  ht.lift('def',(hndl)=>{
     def=hndl;
     return ht;
-  };
-  ht.on=(name,hndl)=>{
+  }).lift('bind',(name,hndl)=>{
     ev[name]=ev[name]|[];
     ev[name].push(hndl);
     return ht;
-  };
-  ht.lstn=(...arg)=>{
+  }).lift('on',(name,hndl)=>{
+    ev[name]=ev[name]|[];
+    ev[name].push(hndl);
+    return ht;
+  }).lift('lstn',(...arg)=>{
     if(o.prot.match(
       /https:/
     ) && o.key && o.cert){
@@ -303,11 +301,11 @@ enn.http.serv=(
     });
     ht.serv.listen(...arg);
     return ht;
-  };
+  }).end();
   return ht;
 };
 
-enn.oauth2={};
+/*enn.oauth2={};
 enn.oauth2.serv=(...arg)=>{
   const serv=enn.http.serv(...arg);
   const regist=enn.lift('regist',(path,hndl)=>{
@@ -321,7 +319,7 @@ enn.oauth2.serv=(...arg)=>{
   }).end();
 
   return regist;
-};
+};*/
 const strm={};
 const fork=enn.cach().def((opt)=>{
   enn.loop(os.cpu.core,(cnt)=>{
@@ -336,6 +334,11 @@ const fork=enn.cach().def((opt)=>{
   enn.loop(thred,(cnt)=>{
     clust.fork();
   });
+}).set('thread',(len)=>{
+  enn.loop(len,(cnt)=>{
+    clust.fork();
+  });
+
 }).set('hndl',(hndl)=>{
   hndl(clust);
 });
@@ -344,10 +347,10 @@ enn.clust=(name='cpu',opt={})=>{
   let slave=()=>{};
   const deploy=()=>{
     if(clust.isMaster){
-      fork.get(name)(opt);
-      master();
+      fork.fet(name)(opt);
+      master(clust);
     }else{
-      slave();
+      slave(clust);
     }
   };
   const c={

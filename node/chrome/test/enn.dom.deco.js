@@ -7,7 +7,7 @@ enn.chrm.eval('./index.html',()=>{
       enn.dom.make('p')
     ).id('id')
     .name('name')
-    .clas('cname','clas')
+    .cl('cname','clas')
     .text('test')
     .blon(enn.dom.elem('id','body'))
     .test(true,(dc)=>{
@@ -28,9 +28,9 @@ enn.chrm.eval('./index.html',()=>{
     deco.attr('name','name2');
     test(el.getAttribute('name')==='name2');
 
-    deco.clas('cname2','clas1','clas2','clas3');
+    deco.cl('cname2','clas1','clas2','clas3');
     test(el.getAttribute('class')==='clas1 clas2 clas3');
-    deco.clas('cname2');
+    deco.cl('cname2');
     test(el.getAttribute('class')==='clas1 clas2 clas3');
 
     enn.dom.deco(
