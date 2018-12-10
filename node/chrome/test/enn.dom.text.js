@@ -7,5 +7,5 @@ enn.chrm.eval('./index.html',()=>{
       .textContent==='text');
     end();
   });
-});
+}).end();
 

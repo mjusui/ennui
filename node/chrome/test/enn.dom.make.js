@@ -7,5 +7,5 @@ enn.chrm.eval('./index.html',()=>{
       .tagName==='SPAN');
     end();
   });
-});
+}).end();
 

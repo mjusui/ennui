@@ -1,6 +1,6 @@
 enn=require('../lib/ennui.chrome.js');
 
-const time=4;
+const time=300;
 enn.asrt((test,end,cmnt)=>{
   cmnt('enn.chrm.eval: result');
   let l=time;

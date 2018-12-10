@@ -8,5 +8,5 @@ enn.chrm.eval('./index.html',()=>{
       ).textContent==='test');
     end();
   });
-});
+}).end();
 

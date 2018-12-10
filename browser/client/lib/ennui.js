@@ -2559,15 +2559,15 @@ enn.dom.pttn=(name,hndl)=>{
   return pttn.eval(name,hndl);
 };
 
-enn.rand=(mult=17)=>{
+/*enn.rand=(mult=17)=>{
   return Math.floor(
     Math.random() * mult);
-};
-/*enn.rand=(mult=17)=>{
+};*/
+enn.rand=(mult=17)=>{
   return Math.floor(
     Math.random() * 10**mult
   );
-};*/
+};
 enn.lib=(name,val,overwrite=false)=>{
   enn[name]=enn[name]||val;
   if(overwrite){
